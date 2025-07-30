@@ -36,3 +36,102 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# React Native
+android/
+ios/
+build/
+*.keystore
+*.gradle
+*.iml
+*.hprof
+*.log
+*.lock
+*.tmp
+*.swp
+*.swo
+*.db
+*.db-journal
+*.apk
+*.ap_ 
+*.dex
+*.class
+*.so
+*.jar
+*.hmap
+*.ipa
+*.xcuserstate
+*.xcworkspace
+*.xcuserdata
+*.xcodeproj
+*.xcconfig
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcsettings
+*.xcscmblueprint
+*.xcuserstate
+*.xcworkspacedata
+*.xcuserdatad
+
+# React Native Packager
+.expo/
+.expo-shared/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Buck
+buck-out/
+\.buckd/
+.buckconfig.local
+.buckversion
+.buckd
+
+# Misc
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VSCode
+.vscode/
+
+# JetBrains IDEs
+.idea/
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env
+
+# typescript
+*.tsbuildinfo
+
+app-example
+
+# Test coverage
+coverage/
