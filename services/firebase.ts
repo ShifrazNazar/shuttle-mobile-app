@@ -59,3 +59,7 @@ const app: FirebaseApp = initializeApp(firebaseConfig);
 
 // Initialize Firebase Auth
 export const auth: Auth = getAuth(app);
+
+// Initialize Firestore
+import { getFirestore } from "firebase/firestore";
+export const firestore = getFirestore(app);

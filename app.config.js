@@ -13,7 +13,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.anonymous.shuttleapp",
-      googleServicesFile: "./GoogleService-Info.plist",
+      googleServicesFile: "./ios/GoogleService-Info.plist",
     },
     android: {
       adaptiveIcon: {

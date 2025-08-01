@@ -14,7 +14,8 @@ import {
   User,
   AuthError,
 } from "firebase/auth";
-import { auth } from "../services/firebase";
+import { auth, firestore } from "../services/firebase";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 // Auth result interface
 interface AuthResult {
@@ -26,7 +27,12 @@ interface AuthResult {
 // Auth context interface
 interface AuthContextType {
   user: User | null;
-  signUp: (email: string, password: string) => Promise<AuthResult>;
+  role: string | null;
+  signUp: (
+    email: string,
+    password: string,
+    role: "student" | "driver"
+  ) => Promise<AuthResult>;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<AuthResult>;
   resetPassword: (email: string) => Promise<AuthResult>;
@@ -48,21 +54,37 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      if (user) {
+        // Fetch role from Firestore
+        try {
+          const userDoc = await getDoc(doc(firestore, "users", user.uid));
+          if (userDoc.exists()) {
+            setRole(userDoc.data().role || null);
+          } else {
+            setRole(null);
+          }
+        } catch (e) {
+          setRole(null);
+        }
+      } else {
+        setRole(null);
+      }
       setLoading(false);
     });
-
     return unsubscribe;
   }, []);
 
-  // Sign up with email and password
+  // Sign up with email and password and store role in Firestore
   const signUp = async (
     email: string,
-    password: string
+    password: string,
+    role: "student" | "driver"
   ): Promise<AuthResult> => {
     try {
       const result = await createUserWithEmailAndPassword(
@@ -70,6 +92,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email,
         password
       );
+      // Store role in Firestore
+      await setDoc(doc(firestore, "users", result.user.uid), {
+        email,
+        role,
+      });
+      setRole(role);
       return { success: true, user: result.user };
     } catch (error) {
       const authError = error as AuthError;
@@ -77,13 +105,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Sign in with email and password
+  // Sign in with email and password and fetch role
   const signIn = async (
     email: string,
     password: string
   ): Promise<AuthResult> => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
+      // Fetch role from Firestore
+      try {
+        const userDoc = await getDoc(doc(firestore, "users", result.user.uid));
+        if (userDoc.exists()) {
+          setRole(userDoc.data().role || null);
+        } else {
+          setRole(null);
+        }
+      } catch (e) {
+        setRole(null);
+      }
       return { success: true, user: result.user };
     } catch (error) {
       const authError = error as AuthError;
@@ -95,6 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOutUser = async (): Promise<AuthResult> => {
     try {
       await signOut(auth);
+      setRole(null);
       return { success: true };
     } catch (error) {
       const authError = error as AuthError;
@@ -115,6 +155,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
+    role,
     signUp,
     signIn,
     signOut: signOutUser,

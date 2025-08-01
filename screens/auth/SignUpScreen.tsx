@@ -14,11 +14,12 @@ const SignUpScreen: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [role, setRole] = useState<"student" | "driver">("student");
   const [loading, setLoading] = useState<boolean>(false);
   const { signUp } = useAuth();
 
   const handleSignUp = async (): Promise<void> => {
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !role) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
@@ -34,7 +35,7 @@ const SignUpScreen: React.FC = () => {
     }
 
     setLoading(true);
-    const result = await signUp(email, password);
+    const result = await signUp(email, password, role);
     setLoading(false);
 
     if (result.success) {
@@ -61,6 +62,32 @@ const SignUpScreen: React.FC = () => {
       </View>
 
       <View className="gap-4">
+        {/* Role selection */}
+        <View>
+          <Text className="text-gray-700 mb-2 font-medium">Role</Text>
+          <View className="flex-row gap-4">
+            <TouchableOpacity
+              className={`flex-1 rounded-lg py-3 ${role === "student" ? "bg-blue-500" : "bg-gray-200"}`}
+              onPress={() => setRole("student")}
+            >
+              <Text
+                className={`text-center font-semibold ${role === "student" ? "text-white" : "text-gray-700"}`}
+              >
+                Student
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className={`flex-1 rounded-lg py-3 ${role === "driver" ? "bg-blue-500" : "bg-gray-200"}`}
+              onPress={() => setRole("driver")}
+            >
+              <Text
+                className={`text-center font-semibold ${role === "driver" ? "text-white" : "text-gray-700"}`}
+              >
+                Driver
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
         <View>
           <Text className="text-gray-700 mb-2 font-medium">Email</Text>
           <TextInput

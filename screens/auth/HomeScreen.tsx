@@ -4,7 +4,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 
 const HomeScreen: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, role, signOut } = useAuth();
 
   const handleSignOut = async (): Promise<void> => {
     const result = await signOut();
@@ -28,7 +28,7 @@ const HomeScreen: React.FC = () => {
           Email: {user?.email || "Unknown"}
         </Text>
         <Text className="text-center text-sm text-gray-500 mb-8">
-          Name: {user?.displayName || "Unknown"}
+          Role: {role || "Unknown"}
         </Text>
         <TouchableOpacity
           className="rounded-lg py-3 mt-6 bg-red-500"
