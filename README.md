@@ -93,7 +93,7 @@ To develop a cross-platform mobile app that enhances campus commuting by giving 
 
 ```
 /smart-shuttle-app
-├── /app
+├── /app                  # Entry point and route definitions
 ├── /assets                 # Images, fonts, static files
 ├── /components            # Reusable UI components
 │   ├── /common           # Generic components
@@ -108,7 +108,6 @@ To develop a cross-platform mobile app that enhances campus commuting by giving 
 │   ├── /location        # GPS and location services
 │   └── /notifications   # Push notification logic
 ├── /contexts            # React Context providers
-├── /navigation          # React Navigation configuration
 ├── /utils               # Helper functions and constants
 ├── /hooks               # Custom React hooks
 ├── app.json             # Expo configuration
