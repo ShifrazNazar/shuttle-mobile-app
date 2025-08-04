@@ -48,7 +48,6 @@ export default {
       ],
     ],
     extra: {
-      // Firebase configuration from environment variables
       firebaseApiKey: process.env.FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
       firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
@@ -57,6 +56,8 @@ export default {
       firebaseAppId: process.env.FIREBASE_APP_ID,
       firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID,
       firebaseDatabaseURL: process.env.FIREBASE_DATABASE_URL,
+      apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
+      googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
     },
   },
 };

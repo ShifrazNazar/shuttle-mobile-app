@@ -17,23 +17,6 @@ export interface AppConfig {
   };
 }
 
-export interface ApiEndpoints {
-  auth: {
-    login: string;
-    register: string;
-    logout: string;
-  };
-  shuttle: {
-    locations: string;
-    routes: string;
-    stops: string;
-  };
-  notifications: {
-    tokens: string;
-    send: string;
-  };
-}
-
 export const APP_CONFIG: AppConfig = {
   apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || "https://api.example.com",
   googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -49,22 +32,5 @@ export const APP_CONFIG: AppConfig = {
   notificationConfig: {
     defaultSound: "default",
     defaultBadge: 1,
-  },
-};
-
-export const API_ENDPOINTS: ApiEndpoints = {
-  auth: {
-    login: "/auth/login",
-    register: "/auth/register",
-    logout: "/auth/logout",
-  },
-  shuttle: {
-    locations: "/shuttle/locations",
-    routes: "/shuttle/routes",
-    stops: "/shuttle/stops",
-  },
-  notifications: {
-    tokens: "/notifications/tokens",
-    send: "/notifications/send",
   },
 };
