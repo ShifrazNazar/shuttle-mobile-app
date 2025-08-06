@@ -35,6 +35,11 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
   }, [user]);
 
   const handleSignOut = async () => {
+    // Stop location tracking before signing out
+    if (isTracking) {
+      await stopLocationTracking();
+    }
+
     const result = await signOut();
     if (!result.success) {
       Alert.alert("Error", result.error);
