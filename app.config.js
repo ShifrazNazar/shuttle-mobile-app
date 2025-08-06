@@ -14,6 +14,9 @@ export default {
       supportsTablet: true,
       bundleIdentifier: "com.anonymous.shuttleapp",
       googleServicesFile: "./ios/GoogleService-Info.plist",
+      config: {
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      },
     },
     android: {
       adaptiveIcon: {
@@ -22,6 +25,11 @@ export default {
       },
       package: "com.anonymous.shuttleapp",
       googleServicesFile: "./android/app/google-services.json",
+      config: {
+        googleMaps: {
+          apiKey: process.env.GOOGLE_MAPS_API_KEY,
+        },
+      },
     },
     web: {
       bundler: "metro",
@@ -46,6 +54,17 @@ export default {
           },
         },
       ],
+      [
+        "expo-location",
+        {
+          locationAlwaysAndWhenInUsePermission:
+            "This app needs location access to track shuttle bus locations. Background location allows continuous tracking even when the app is not active.",
+          locationAlwaysPermission:
+            "Background location is needed to continuously track shuttle bus locations and provide real-time updates to students.",
+          locationWhenInUsePermission:
+            "Location access is needed to track shuttle bus positions and provide real-time location updates.",
+        },
+      ],
     ],
     extra: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
@@ -57,7 +76,7 @@ export default {
       firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID,
       firebaseDatabaseURL: process.env.FIREBASE_DATABASE_URL,
       apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
-      googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
     },
   },
 };

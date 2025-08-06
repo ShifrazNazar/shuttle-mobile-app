@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -27,7 +28,7 @@ const LoginScreen: React.FC = () => {
     setLoading(false);
 
     if (result.success) {
-      router.push("/home");
+      router.push("/");
     } else {
       // Handle login error
       console.error("Login failed:", result.error);
@@ -43,66 +44,68 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <View className="flex-1 justify-center px-5 bg-gray-50">
-      <View className="mb-8">
-        <Text className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Welcome Back
-        </Text>
-        <Text className="text-center text-gray-600">
-          Sign in to your account
-        </Text>
-      </View>
-
-      <View className="gap-4">
-        <View>
-          <Text className="text-gray-700 mb-2 font-medium">Email</Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="flex-1 justify-center px-5">
+        <View className="mb-8">
+          <Text className="text-3xl font-bold text-center text-gray-800 mb-2">
+            Welcome Back
+          </Text>
+          <Text className="text-center text-gray-600">
+            Sign in to your account
+          </Text>
         </View>
 
-        <View>
-          <Text className="text-gray-700 mb-2 font-medium">Password</Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-          />
-        </View>
+        <View className="gap-4">
+          <View>
+            <Text className="text-gray-700 mb-2 font-medium">Email</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
 
-        <TouchableOpacity
-          className={`rounded-lg py-3 mt-6 ${
-            loading ? "bg-gray-400" : "bg-blue-500"
-          }`}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text className="text-white text-center font-semibold text-lg">
-              Sign In
-            </Text>
-          )}
-        </TouchableOpacity>
+          <View>
+            <Text className="text-gray-700 mb-2 font-medium">Password</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
+              placeholder="Enter your password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+          </View>
 
-        <View className="flex-row justify-center mt-6">
-          <Text className="text-gray-600">Don't have an account? </Text>
-          <TouchableOpacity onPress={handleSignUp}>
-            <Text className="text-blue-500 font-semibold">Sign Up</Text>
+          <TouchableOpacity
+            className={`rounded-lg py-3 mt-6 ${
+              loading ? "bg-gray-400" : "bg-blue-500"
+            }`}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-white text-center font-semibold text-lg">
+                Sign In
+              </Text>
+            )}
           </TouchableOpacity>
+
+          <View className="flex-row justify-center mt-6">
+            <Text className="text-gray-600">Don't have an account? </Text>
+            <TouchableOpacity onPress={handleSignUp}>
+              <Text className="text-blue-500 font-semibold">Sign Up</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

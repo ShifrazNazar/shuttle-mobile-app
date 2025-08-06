@@ -1,58 +1,52 @@
 import React from "react";
-import { View, Text } from "react-native";
-import { useAuth } from "../contexts/AuthContext";
+import { View, Text, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
-import { useEffect } from "react";
 
 export default function Index() {
-  const { user } = useAuth();
-
-  useEffect(() => {
-    if (user) {
-      // User is authenticated, redirect to home
-      router.replace("/(auth)/home");
-    }
-  }, [user]);
-
-  if (user) {
-    // Show loading while redirecting
-    return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <Text className="text-lg text-gray-600">Loading...</Text>
-      </View>
-    );
-  }
-
-  // Show login screen for unauthenticated users
   return (
-    <View className="flex-1 items-center justify-center bg-gray-50 px-6">
-      <View className="w-full max-w-sm">
-        <Text className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Welcome to Shuttle App
+    <View className="flex-1 bg-white p-6">
+      {/* Header */}
+      <View className="items-center mt-20 mb-12">
+        <Text className="text-3xl font-bold text-gray-800 mb-2">
+          🚍 Smart Shuttle
         </Text>
-        <Text className="text-center text-gray-600 mb-8">
-          Your ride companion
+        <Text className="text-gray-600 text-center">
+          Choose your role to get started
         </Text>
+      </View>
 
-        <View className="space-y-4">
-          <View className="bg-blue-500 rounded-lg py-3">
-            <Text
-              className="text-white text-center font-semibold text-lg"
-              onPress={() => router.push("/login")}
-            >
-              Sign In
-            </Text>
-          </View>
+      {/* Role Buttons */}
+      <View className="flex-1 justify-center space-y-4">
+        <TouchableOpacity
+          className="bg-blue-500 p-4 rounded-lg"
+          onPress={() => router.push("/driver")}
+        >
+          <Text className="text-white text-lg font-semibold text-center">
+            🚗 Driver Mode
+          </Text>
+          <Text className="text-white/80 text-sm text-center mt-1">
+            Share your location with students
+          </Text>
+        </TouchableOpacity>
 
-          <View className="bg-gray-100 rounded-lg py-3">
-            <Text
-              className="text-gray-800 text-center font-semibold text-lg"
-              onPress={() => router.push("/signup")}
-            >
-              Create Account
-            </Text>
-          </View>
-        </View>
+        <TouchableOpacity
+          className="bg-green-500 p-4 rounded-lg"
+          onPress={() => router.push("/student")}
+        >
+          <Text className="text-white text-lg font-semibold text-center">
+            🎓 Student Mode
+          </Text>
+          <Text className="text-white/80 text-sm text-center mt-1">
+            Track shuttles in real-time
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Info Section */}
+      <View className="bg-gray-50 p-4 rounded-lg mb-6">
+        <Text className="text-sm text-gray-600 text-center">
+          Note: You'll need to sign up and log in first
+        </Text>
       </View>
     </View>
   );

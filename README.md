@@ -123,33 +123,53 @@ To develop a cross-platform mobile app that enhances campus commuting by giving 
 - Node.js (v16 or later)
 - npm or yarn
 - Expo CLI
-- iOS Simulator (Mac) / Android Emulator
+- Firebase project with Realtime Database enabled
+- Google Maps API key
 
-### Installation
+### Quick Setup
 
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/your-org/smart-shuttle-app.git
-   cd smart-shuttle-app
-   ```
-
-2. **Install dependencies**
+1. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-3. **Start the development server**
+2. **Environment Configuration**
 
+   ```bash
+   cp env.example .env
+   # Fill in your Firebase and Google Maps credentials
+   ```
+
+3. **Firebase Setup**
+   - Create Firebase project and enable Realtime Database
+   - Set database rules to allow read/write for testing
+
+4. **Google Maps Setup**
+   - Enable Maps SDK for Android and iOS
+   - Create API key and add to `.env`
+
+5. **Start the app**
    ```bash
    npx expo start
    ```
 
-4. **Run on device/simulator**
-   - Press `i` for iOS Simulator
-   - Press `a` for Android Emulator
-   - Scan QR code with Expo Go app for physical device testing
+### Testing the App
+
+**Driver Mode:**
+
+- Select "Driver Mode" from main screen
+- Enter Driver ID and Bus ID
+- Grant location permissions
+- Tap "Start Tracking" to share location
+
+**Student Mode:**
+
+- Select "Student Mode" from main screen
+- Enter Bus ID to track
+- Tap "Track Bus" to see real-time location
+
+📖 **Detailed setup instructions:** See [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md)
 
 ### Development Options
 

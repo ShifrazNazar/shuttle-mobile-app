@@ -55,7 +55,7 @@ if (missingConfig.length > 0) {
 }
 
 // Initialize Firebase
-const app: FirebaseApp = initializeApp(firebaseConfig);
+export const app: FirebaseApp = initializeApp(firebaseConfig);
 
 // Initialize Firebase Auth
 export const auth: Auth = getAuth(app);

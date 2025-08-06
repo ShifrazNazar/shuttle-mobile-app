@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useState,
   ReactNode,
+  useMemo,
 } from "react";
 import {
   onAuthStateChanged,
@@ -28,6 +29,7 @@ interface AuthResult {
 interface AuthContextType {
   user: User | null;
   role: string | null;
+  loading: boolean;
   signUp: (
     email: string,
     password: string,
@@ -59,20 +61,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
       if (user) {
         // Fetch role from Firestore
         try {
           const userDoc = await getDoc(doc(firestore, "users", user.uid));
           if (userDoc.exists()) {
+            setUser(user);
             setRole(userDoc.data().role || null);
           } else {
+            setUser(user);
             setRole(null);
           }
         } catch (e) {
+          setUser(user);
           setRole(null);
         }
       } else {
+        setUser(null);
         setRole(null);
       }
       setLoading(false);
@@ -153,14 +158,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const value: AuthContextType = {
-    user,
-    role,
-    signUp,
-    signIn,
-    signOut: signOutUser,
-    resetPassword,
-  };
+  const value: AuthContextType = useMemo(
+    () => ({
+      user,
+      role,
+      loading,
+      signUp,
+      signIn,
+      signOut: signOutUser,
+      resetPassword,
+    }),
+    [user, role, loading]
+  );
 
   return (
     <AuthContext.Provider value={value}>

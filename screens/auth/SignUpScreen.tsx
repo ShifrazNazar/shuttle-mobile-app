@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const SignUpScreen: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -51,106 +52,108 @@ const SignUpScreen: React.FC = () => {
   };
 
   return (
-    <View className="flex-1 justify-center px-5 bg-gray-50">
-      <View className="mb-8">
-        <Text className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Create Account
-        </Text>
-        <Text className="text-center text-gray-600">
-          Sign up to get started
-        </Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="flex-1 justify-center px-5">
+        <View className="mb-8">
+          <Text className="text-3xl font-bold text-center text-gray-800 mb-2">
+            Create Account
+          </Text>
+          <Text className="text-center text-gray-600">
+            Sign up to get started
+          </Text>
+        </View>
 
-      <View className="gap-4">
-        {/* Role selection */}
-        <View>
-          <Text className="text-gray-700 mb-2 font-medium">Role</Text>
-          <View className="flex-row gap-4">
-            <TouchableOpacity
-              className={`flex-1 rounded-lg py-3 ${role === "student" ? "bg-blue-500" : "bg-gray-200"}`}
-              onPress={() => setRole("student")}
-            >
-              <Text
-                className={`text-center font-semibold ${role === "student" ? "text-white" : "text-gray-700"}`}
+        <View className="gap-4">
+          {/* Role selection */}
+          <View>
+            <Text className="text-gray-700 mb-2 font-medium">Role</Text>
+            <View className="flex-row gap-4">
+              <TouchableOpacity
+                className={`flex-1 rounded-lg py-3 ${role === "student" ? "bg-blue-500" : "bg-gray-200"}`}
+                onPress={() => setRole("student")}
               >
-                Student
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={`flex-1 rounded-lg py-3 ${role === "driver" ? "bg-blue-500" : "bg-gray-200"}`}
-              onPress={() => setRole("driver")}
-            >
-              <Text
-                className={`text-center font-semibold ${role === "driver" ? "text-white" : "text-gray-700"}`}
+                <Text
+                  className={`text-center font-semibold ${role === "student" ? "text-white" : "text-gray-700"}`}
+                >
+                  Student
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`flex-1 rounded-lg py-3 ${role === "driver" ? "bg-blue-500" : "bg-gray-200"}`}
+                onPress={() => setRole("driver")}
               >
-                Driver
+                <Text
+                  className={`text-center font-semibold ${role === "driver" ? "text-white" : "text-gray-700"}`}
+                >
+                  Driver
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View>
+            <Text className="text-gray-700 mb-2 font-medium">Email</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View>
+            <Text className="text-gray-700 mb-2 font-medium">Password</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
+              placeholder="Enter your password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View>
+            <Text className="text-gray-700 mb-2 font-medium">
+              Confirm Password
+            </Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+          </View>
+
+          <TouchableOpacity
+            className={`rounded-lg py-3 mt-6 ${
+              loading ? "bg-gray-400" : "bg-blue-500"
+            }`}
+            onPress={handleSignUp}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-white text-center font-semibold text-lg">
+                Sign Up
               </Text>
+            )}
+          </TouchableOpacity>
+
+          <View className="flex-row justify-center mt-6">
+            <Text className="text-gray-600">Already have an account? </Text>
+            <TouchableOpacity onPress={handleBackToLogin}>
+              <Text className="text-blue-500 font-semibold">Sign In</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <View>
-          <Text className="text-gray-700 mb-2 font-medium">Email</Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
-
-        <View>
-          <Text className="text-gray-700 mb-2 font-medium">Password</Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-          />
-        </View>
-
-        <View>
-          <Text className="text-gray-700 mb-2 font-medium">
-            Confirm Password
-          </Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            autoCapitalize="none"
-          />
-        </View>
-
-        <TouchableOpacity
-          className={`rounded-lg py-3 mt-6 ${
-            loading ? "bg-gray-400" : "bg-blue-500"
-          }`}
-          onPress={handleSignUp}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text className="text-white text-center font-semibold text-lg">
-              Create Account
-            </Text>
-          )}
-        </TouchableOpacity>
-
-        <View className="flex-row justify-center mt-6">
-          <Text className="text-gray-600">Already have an account? </Text>
-          <TouchableOpacity onPress={handleBackToLogin}>
-            <Text className="text-blue-500 font-semibold">Sign In</Text>
-          </TouchableOpacity>
-        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
