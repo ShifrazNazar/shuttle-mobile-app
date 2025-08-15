@@ -62,12 +62,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Fetch role from Firestore
+        // Fetch role from Firestore (document keyed by Auth UID)
         try {
           const userDoc = await getDoc(doc(firestore, "users", user.uid));
           if (userDoc.exists()) {
             setUser(user);
-            setRole(userDoc.data().role || null);
+            setRole((userDoc.data() as { role?: string }).role || null);
           } else {
             setUser(user);
             setRole(null);
@@ -117,11 +117,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<AuthResult> => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      // Fetch role from Firestore
+      // Fetch role from Firestore using Auth UID
       try {
         const userDoc = await getDoc(doc(firestore, "users", result.user.uid));
         if (userDoc.exists()) {
-          setRole(userDoc.data().role || null);
+          setRole((userDoc.data() as { role?: string }).role || null);
         } else {
           setRole(null);
         }
