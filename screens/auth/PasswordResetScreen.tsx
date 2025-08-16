@@ -11,31 +11,37 @@ import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const LoginScreen: React.FC = () => {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+const PasswordResetScreen: React.FC = () => {
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const { signIn } = useAuth();
+  const { updatePassword } = useAuth();
 
-  const handleLogin = async (): Promise<void> => {
-    if (!email || !password) {
+  const handlePasswordUpdate = async (): Promise<void> => {
+    if (!newPassword || !confirmPassword) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return;
+    }
+
     setLoading(true);
-    const result = await signIn(email, password);
+    const result = await updatePassword(newPassword);
     setLoading(false);
 
     if (result.success) {
+      Alert.alert("Success", "Password updated successfully!");
       router.push("/");
     } else {
-      // Handle login error
-      console.error("Login failed:", result.error);
-      Alert.alert(
-        "Login Failed",
-        result.error || "An unexpected error occurred"
-      );
+      Alert.alert("Password Update Failed", result.error);
     }
   };
 
@@ -44,34 +50,35 @@ const LoginScreen: React.FC = () => {
       <View className="flex-1 justify-center px-5">
         <View className="mb-8">
           <Text className="text-3xl font-bold text-center text-gray-800 mb-2">
-            Welcome Back
+            Change Password
           </Text>
           <Text className="text-center text-gray-600">
-            Sign in to your account
+            Please change your default password for security
           </Text>
         </View>
 
         <View className="gap-4">
           <View>
-            <Text className="text-gray-700 mb-2 font-medium">Email</Text>
+            <Text className="text-gray-700 mb-2 font-medium">New Password</Text>
             <TextInput
               className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
+              placeholder="Enter your new password"
+              value={newPassword}
+              onChangeText={setNewPassword}
+              secureTextEntry
               autoCapitalize="none"
-              autoCorrect={false}
             />
           </View>
 
           <View>
-            <Text className="text-gray-700 mb-2 font-medium">Password</Text>
+            <Text className="text-gray-700 mb-2 font-medium">
+              Confirm New Password
+            </Text>
             <TextInput
               className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
+              placeholder="Confirm your new password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
               secureTextEntry
               autoCapitalize="none"
             />
@@ -81,27 +88,21 @@ const LoginScreen: React.FC = () => {
             className={`rounded-lg py-3 mt-6 ${
               loading ? "bg-gray-400" : "bg-blue-500"
             }`}
-            onPress={handleLogin}
+            onPress={handlePasswordUpdate}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="white" />
             ) : (
               <Text className="text-white text-center font-semibold text-lg">
-                Sign In
+                Update Password
               </Text>
             )}
           </TouchableOpacity>
-
-          <View className="flex-row justify-center mt-6">
-            <Text className="text-gray-600 text-center">
-              Contact your administrator to create an account
-            </Text>
-          </View>
         </View>
       </View>
     </SafeAreaView>
   );
 };
 
-export default LoginScreen;
+export default PasswordResetScreen;

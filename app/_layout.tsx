@@ -8,20 +8,25 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
 function AuthGuard() {
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, isFirstTimeLogin } = useAuth();
 
   useEffect(() => {
     if (!loading) {
-      // Only redirect if user is authenticated and has a valid role
       if (user && role) {
-        if (role === "driver") {
-          router.replace("/driver");
-        } else if (role === "student") {
-          router.replace("/student");
+        // Check if this is first time login (needs password change)
+        if (isFirstTimeLogin) {
+          router.replace("/password-reset");
+        } else {
+          // Redirect based on role
+          if (role === "driver") {
+            router.replace("/driver");
+          } else if (role === "student") {
+            router.replace("/student");
+          }
         }
       }
     }
-  }, [user, role, loading]);
+  }, [user, role, loading, isFirstTimeLogin]);
 
   return <Slot />;
 }

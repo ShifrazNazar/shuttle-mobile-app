@@ -9,14 +9,14 @@ import React, {
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
+  updatePassword as updateFirebasePassword,
   User,
   AuthError,
 } from "firebase/auth";
 import { auth, firestore } from "../services/firebase";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 // Auth result interface
 interface AuthResult {
@@ -30,14 +30,12 @@ interface AuthContextType {
   user: User | null;
   role: string | null;
   loading: boolean;
-  signUp: (
-    email: string,
-    password: string,
-    role: "student" | "driver"
-  ) => Promise<AuthResult>;
+  isFirstTimeLogin: boolean;
+
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<AuthResult>;
   resetPassword: (email: string) => Promise<AuthResult>;
+  updatePassword: (newPassword: string) => Promise<AuthResult>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,6 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isFirstTimeLogin, setIsFirstTimeLogin] = useState<boolean>(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -66,15 +65,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const userDoc = await getDoc(doc(firestore, "users", user.uid));
           if (userDoc.exists()) {
+            const userData = userDoc.data() as {
+              role?: string;
+              defaultPassword?: string;
+              passwordChanged?: boolean;
+            };
             setUser(user);
-            setRole((userDoc.data() as { role?: string }).role || null);
+            setRole(userData.role || null);
+            // Check if this is first time login (has default password and hasn't changed it)
+            setIsFirstTimeLogin(
+              !!userData.defaultPassword && !userData.passwordChanged
+            );
           } else {
             setUser(user);
             setRole(null);
+            setIsFirstTimeLogin(false);
           }
         } catch (e) {
           setUser(user);
           setRole(null);
+          setIsFirstTimeLogin(false);
         }
       } else {
         setUser(null);
@@ -84,31 +94,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
     return unsubscribe;
   }, []);
-
-  // Sign up with email and password and store role in Firestore
-  const signUp = async (
-    email: string,
-    password: string,
-    role: "student" | "driver"
-  ): Promise<AuthResult> => {
-    try {
-      const result = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      // Store role in Firestore
-      await setDoc(doc(firestore, "users", result.user.uid), {
-        email,
-        role,
-      });
-      setRole(role);
-      return { success: true, user: result.user };
-    } catch (error) {
-      const authError = error as AuthError;
-      return { success: false, error: authError.message };
-    }
-  };
 
   // Sign in with email and password and fetch role
   const signIn = async (
@@ -121,12 +106,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const userDoc = await getDoc(doc(firestore, "users", result.user.uid));
         if (userDoc.exists()) {
-          setRole((userDoc.data() as { role?: string }).role || null);
+          const userData = userDoc.data() as {
+            role?: string;
+            defaultPassword?: string;
+            passwordChanged?: boolean;
+          };
+          setRole(userData.role || null);
+          // Check if this is first time login
+          setIsFirstTimeLogin(
+            !!userData.defaultPassword && !userData.passwordChanged
+          );
         } else {
           setRole(null);
+          setIsFirstTimeLogin(false);
         }
       } catch (e) {
         setRole(null);
+        setIsFirstTimeLogin(false);
       }
       return { success: true, user: result.user };
     } catch (error) {
@@ -140,6 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await signOut(auth);
       setRole(null);
+      setIsFirstTimeLogin(false);
       return { success: true };
     } catch (error) {
       const authError = error as AuthError;
@@ -158,17 +155,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Update password (for first-time login)
+  const updatePassword = async (newPassword: string): Promise<AuthResult> => {
+    if (!user) {
+      return { success: false, error: "No user logged in" };
+    }
+
+    try {
+      // Update password in Firebase Auth
+      await updateFirebasePassword(user, newPassword);
+
+      // Update Firestore to mark password as changed
+      await updateDoc(doc(firestore, "users", user.uid), {
+        passwordChanged: true,
+        updatedAt: new Date(),
+      });
+
+      setIsFirstTimeLogin(false);
+      return { success: true };
+    } catch (error) {
+      const authError = error as AuthError;
+      return { success: false, error: authError.message };
+    }
+  };
+
   const value: AuthContextType = useMemo(
     () => ({
       user,
       role,
       loading,
-      signUp,
+      isFirstTimeLogin,
       signIn,
       signOut: signOutUser,
       resetPassword,
+      updatePassword,
     }),
-    [user, role, loading]
+    [user, role, loading, isFirstTimeLogin]
   );
 
   return (
