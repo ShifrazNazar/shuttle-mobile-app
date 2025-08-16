@@ -101,8 +101,8 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     }
     // Default region (you can change this to your campus location)
     return {
-      latitude: 37.78825,
-      longitude: -122.4324,
+      latitude: 3.055465,
+      longitude: 101.700363,
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     };
