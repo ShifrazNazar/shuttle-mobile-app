@@ -116,6 +116,15 @@ const PasswordResetScreen: React.FC = () => {
               </Text>
             )}
           </TouchableOpacity>
+
+          <TouchableOpacity
+            className="mt-4"
+            onPress={() => router.push("/login")}
+          >
+            <Text className="theme-text-secondary text-center text-base">
+              ← Back to Login
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>

@@ -92,6 +92,12 @@ const LoginScreen: React.FC = () => {
               secureTextEntry
               autoCapitalize="none"
             />
+            <TouchableOpacity
+              className="mt-2"
+              onPress={() => router.push("/forgot-password")}
+            >
+              <Text className="theme-link text-sm">Forgot Password?</Text>
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity
