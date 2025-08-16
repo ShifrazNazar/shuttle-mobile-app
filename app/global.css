@@ -1,3 +1,62 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom theme variables to match web version */
+@layer base {
+  :root {
+    /* Colors - Light theme (matching web) */
+    --color-background: #f7f8fb;
+    --color-foreground: #0f172a; /* slate-900 */
+    --color-muted: #f1f5f9; /* slate-100 */
+    --color-muted-foreground: #475569; /* slate-600 */
+    --color-card: #ffffff;
+    --color-card-foreground: #0f172a;
+    --color-border: #e5e7eb; /* gray-200 */
+    --color-ring: #93c5fd; /* blue-300 */
+
+    --color-primary: #2563eb; /* blue-600 */
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #0ea5e9; /* sky-500 */
+    --color-secondary-foreground: #06223a;
+    --color-accent: #22c55e; /* green-500 */
+    --color-accent-foreground: #052e16;
+    --color-destructive: #ef4444; /* red-500 */
+    --color-destructive-foreground: #450a0a;
+  }
+}
+
+/* Custom utility classes for consistent theming */
+@layer components {
+  .theme-bg {
+    @apply bg-[#f7f8fb];
+  }
+
+  .theme-card {
+    @apply bg-white border border-[#e5e7eb] rounded-[10px] shadow-sm;
+  }
+
+  .theme-text-primary {
+    @apply text-[#0f172a];
+  }
+
+  .theme-text-secondary {
+    @apply text-[#475569];
+  }
+
+  .theme-text-muted {
+    @apply text-[#94a3b8];
+  }
+
+  .theme-button-primary {
+    @apply bg-[#2563eb] text-white;
+  }
+
+  .theme-button-secondary {
+    @apply bg-white border border-[#e5e7eb] text-[#0f172a];
+  }
+
+  .theme-input {
+    @apply bg-white border border-[#e5e7eb] rounded-[10px] px-4 py-3 text-[#0f172a];
+  }
+}

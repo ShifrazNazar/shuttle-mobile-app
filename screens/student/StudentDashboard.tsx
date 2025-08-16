@@ -109,52 +109,54 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 theme-bg">
       <ScrollView className="flex-1">
-        <View className="p-5 bg-green-500">
-          <View className="flex-row justify-between items-center mb-2">
+        {/* Header */}
+        <View className="bg-white border-b border-[#e5e7eb] px-6 pt-12 pb-6">
+          <View className="flex-row justify-between items-center">
             <View className="flex-1">
-              <Text className="text-2xl font-bold text-white mb-1">
+              <Text className="text-2xl font-bold theme-text-primary mb-1">
                 🎓 Student Dashboard
               </Text>
-              <Text className="text-base text-white opacity-80">
+              <Text className="theme-text-secondary text-base">
                 Track your shuttle in real-time
               </Text>
               {user?.email && (
-                <Text className="text-sm text-white opacity-70">
+                <Text className="theme-text-muted text-sm mt-1">
                   Logged in as: {user.email}
                 </Text>
               )}
             </View>
             <TouchableOpacity
-              className="bg-red-500 px-4 py-2 rounded-lg"
+              className="bg-[#ef4444] px-4 py-2 rounded-[10px]"
               onPress={handleSignOut}
             >
-              <Text className="text-white font-semibold">Sign Out</Text>
+              <Text className="text-white font-semibold text-sm">Sign Out</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        <View className="p-5 bg-white m-5 rounded-xl">
-          <Text className="text-base font-bold mb-2 text-gray-800">
+        <View className="theme-card p-5 m-5">
+          <Text className="text-base font-bold mb-2 theme-text-primary">
             Bus ID to Track:
           </Text>
           <TextInput
-            className="border border-gray-300 rounded-lg p-3 mb-4 text-base bg-gray-50"
+            className="theme-input mb-4"
             placeholder="Enter Bus ID (e.g., BUS001)"
+            placeholderTextColor="#94a3b8"
             value={busId}
             onChangeText={setBusId}
           />
           {!isTracking ? (
             <TouchableOpacity
-              className="bg-green-500 p-4 rounded-lg items-center"
+              className="theme-button-primary p-4 rounded-[10px] items-center"
               onPress={startTrackingBus}
             >
               <Text className="text-white text-lg font-bold">🔍 Track Bus</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              className="bg-red-500 p-4 rounded-lg items-center"
+              className="bg-[#ef4444] p-4 rounded-[10px] items-center"
               onPress={stopTrackingBus}
             >
               <Text className="text-white text-lg font-bold">

@@ -98,23 +98,25 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 p-6">
-        {/* Header */}
-        <View className="flex-col justify-between items-center mb-8">
-          <Text className="text-2xl font-bold text-gray-800">
-            🚗 Location Sharing
+    <SafeAreaView className="flex-1 theme-bg">
+      {/* Header */}
+      <View className="bg-white border-b border-[#e5e7eb] px-6 pt-12 pb-6">
+        <View className="flex-col justify-between items-center">
+          <Text className="text-2xl font-bold theme-text-primary">
+            🚗 Driver Dashboard
           </Text>
-          <Text className="text-gray-600">
+          <Text className="theme-text-secondary text-base">
             Share your location with students
           </Text>
         </View>
+      </View>
 
+      <View className="flex-1 p-6">
         {/* Main Tracking Button */}
         <View className="flex-1 justify-center">
           {!isTracking ? (
             <TouchableOpacity
-              className="bg-green-500 p-8 rounded-xl items-center"
+              className="theme-button-primary p-8 rounded-[12px] items-center"
               onPress={startTracking}
             >
               <Text className="text-white text-2xl font-bold mb-2">
@@ -126,7 +128,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              className="bg-red-500 p-8 rounded-xl items-center"
+              className="bg-[#ef4444] p-8 rounded-[12px] items-center"
               onPress={stopLocationTracking}
             >
               <Text className="text-white text-2xl font-bold mb-2">
@@ -140,34 +142,42 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
         </View>
 
         {/* Status */}
-        <View className="bg-gray-50 p-4 rounded-lg mb-6">
-          <Text className="text-lg font-bold mb-4 text-gray-800">
+        <View className="theme-card p-4 mb-6">
+          <Text className="text-lg font-bold mb-4 theme-text-primary">
             📊 Status
           </Text>
           <View className="flex-row justify-between mb-2">
-            <Text className="text-base text-gray-600">Location Sharing:</Text>
+            <Text className="text-base theme-text-secondary">
+              Location Sharing:
+            </Text>
             <Text
               className={`text-base font-bold ${
-                isTracking ? "text-green-500" : "text-red-500"
+                isTracking ? "text-[#22c55e]" : "text-[#ef4444]"
               }`}
             >
               {isTracking ? "🟢 ACTIVE" : "🔴 INACTIVE"}
             </Text>
           </View>
           <View className="flex-row justify-between mb-2">
-            <Text className="text-base text-gray-600">Bus ID:</Text>
-            <Text className="text-base font-bold">{busId}</Text>
+            <Text className="text-base theme-text-secondary">Bus ID:</Text>
+            <Text className="text-base font-bold theme-text-primary">
+              {busId}
+            </Text>
           </View>
           <View className="flex-row justify-between mb-2">
-            <Text className="text-base text-gray-600">Driver Email:</Text>
-            <Text className="text-base font-bold">
+            <Text className="text-base theme-text-secondary">
+              Driver Email:
+            </Text>
+            <Text className="text-base font-bold theme-text-primary">
               {user?.email || "Not available"}
             </Text>
           </View>
           {currentLocation && (
             <View className="flex-row justify-between mb-2">
-              <Text className="text-base text-gray-600">Last Update:</Text>
-              <Text className="text-base font-bold">
+              <Text className="text-base theme-text-secondary">
+                Last Update:
+              </Text>
+              <Text className="text-base font-bold theme-text-primary">
                 {new Date(currentLocation.timestamp).toLocaleTimeString()}
               </Text>
             </View>
@@ -175,10 +185,10 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
         </View>
         <View className="flex-row justify-between items-center mb-8">
           <TouchableOpacity
-            className="bg-red-500 px-4 py-2 rounded-lg"
+            className="bg-[#ef4444] px-4 py-2 rounded-[10px]"
             onPress={handleSignOut}
           >
-            <Text className="text-white font-semibold">Sign Out</Text>
+            <Text className="text-white font-semibold text-sm">Sign Out</Text>
           </TouchableOpacity>
         </View>
       </View>

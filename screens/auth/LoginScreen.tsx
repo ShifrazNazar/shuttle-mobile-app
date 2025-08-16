@@ -40,23 +40,37 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="flex-1 justify-center px-5">
+    <SafeAreaView className="flex-1 theme-bg">
+      {/* Header */}
+      <View className="bg-white border-b border-[#e5e7eb] px-6 pt-12 pb-6">
+        <View className="items-center">
+          <Text className="text-3xl font-bold theme-text-primary mb-2">
+            Smart Shuttle
+          </Text>
+          <Text className="theme-text-secondary text-center text-base">
+            Asia Pacific University
+          </Text>
+        </View>
+      </View>
+
+      {/* Main Content */}
+      <View className="flex-1 px-6 pt-8">
         <View className="mb-8">
-          <Text className="text-3xl font-bold text-center text-gray-800 mb-2">
+          <Text className="text-2xl font-bold theme-text-primary mb-2">
             Welcome Back
           </Text>
-          <Text className="text-center text-gray-600">
+          <Text className="theme-text-secondary text-base">
             Sign in to your account
           </Text>
         </View>
 
-        <View className="gap-4">
+        <View className="space-y-4">
           <View>
-            <Text className="text-gray-700 mb-2 font-medium">Email</Text>
+            <Text className="theme-text-primary mb-2 font-medium">Email</Text>
             <TextInput
-              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
+              className="theme-input"
               placeholder="Enter your email"
+              placeholderTextColor="#94a3b8"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -66,10 +80,13 @@ const LoginScreen: React.FC = () => {
           </View>
 
           <View>
-            <Text className="text-gray-700 mb-2 font-medium">Password</Text>
+            <Text className="theme-text-primary mb-2 font-medium">
+              Password
+            </Text>
             <TextInput
-              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-800 bg-white"
+              className="theme-input"
               placeholder="Enter your password"
+              placeholderTextColor="#94a3b8"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -78,8 +95,8 @@ const LoginScreen: React.FC = () => {
           </View>
 
           <TouchableOpacity
-            className={`rounded-lg py-3 mt-6 ${
-              loading ? "bg-gray-400" : "bg-blue-500"
+            className={`rounded-[10px] py-4 mt-6 ${
+              loading ? "bg-[#94a3b8]" : "theme-button-primary"
             }`}
             onPress={handleLogin}
             disabled={loading}
@@ -94,7 +111,7 @@ const LoginScreen: React.FC = () => {
           </TouchableOpacity>
 
           <View className="flex-row justify-center mt-6">
-            <Text className="text-gray-600 text-center">
+            <Text className="theme-text-secondary text-center text-sm">
               Contact your administrator to create an account
             </Text>
           </View>
