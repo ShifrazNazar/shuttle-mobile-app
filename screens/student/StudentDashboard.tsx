@@ -138,7 +138,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
 
         <View className="theme-card p-5 m-5">
           <Text className="text-base font-bold mb-2 theme-text-primary">
-            Bus ID to Track:
+            🚌 Bus ID to Track:
           </Text>
           <TextInput
             className="theme-input mb-4"
@@ -149,10 +149,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
           />
           {!isTracking ? (
             <TouchableOpacity
-              className="theme-button-primary p-4 rounded-[10px] items-center"
+              className={`p-4 rounded-[10px] items-center ${
+                busId.trim() ? "theme-button-primary" : "bg-[#94a3b8]"
+              }`}
               onPress={startTrackingBus}
+              disabled={!busId.trim()}
             >
-              <Text className="text-white text-lg font-bold">🔍 Track Bus</Text>
+              <Text className="text-white text-lg font-bold">
+                🔍 Track Bus {busId.trim() ? `(${busId})` : ""}
+              </Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
@@ -160,11 +165,61 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
               onPress={stopTrackingBus}
             >
               <Text className="text-white text-lg font-bold">
-                ⏹️ Stop Tracking
+                ⏹️ Stop Tracking {busId}
               </Text>
             </TouchableOpacity>
           )}
+
+          {/* Bus Status Info */}
+          {busId.trim() && (
+            <View className="mt-4 p-3 bg-[#f8fafc] rounded-[8px] border border-[#e2e8f0]">
+              <Text className="text-sm theme-text-secondary text-center">
+                {isTracking
+                  ? `Currently tracking Bus ${busId}`
+                  : `Ready to track Bus ${busId}`}
+              </Text>
+            </View>
+          )}
         </View>
+
+        {/* Available Buses */}
+        {Object.keys(allBuses).length > 0 && (
+          <View className="theme-card p-5 m-5">
+            <Text className="text-base font-bold mb-3 theme-text-primary">
+              🚌 Available Buses to Track
+            </Text>
+            <Text className="text-sm theme-text-secondary mb-3">
+              Tap on a bus to start tracking it
+            </Text>
+            {Object.entries(allBuses).map(([id, location]) => (
+              <TouchableOpacity
+                key={id}
+                className={`p-3 rounded-[8px] mb-2 border ${
+                  busId === location.busId
+                    ? "border-[#2563eb] bg-[#eff6ff]"
+                    : "border-[#e5e7eb] bg-white"
+                }`}
+                onPress={() => setBusId(location.busId)}
+              >
+                <View className="flex-row justify-between items-center">
+                  <View>
+                    <Text className="font-semibold theme-text-primary">
+                      Bus {location.busId}
+                    </Text>
+                    <Text className="text-sm theme-text-secondary">
+                      Driver: {location.driverEmail || location.driverId}
+                    </Text>
+                  </View>
+                  <View className="bg-[#22c55e] px-2 py-1 rounded-[4px]">
+                    <Text className="text-white text-xs font-medium">
+                      Active
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         {/* Map Section */}
         <View className="m-5 rounded-xl overflow-hidden">

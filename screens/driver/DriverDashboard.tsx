@@ -12,6 +12,8 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { doc, getDoc } from "firebase/firestore";
+import { firestore } from "../../services/firebase";
 
 interface DriverDashboardProps {
   navigation: any;
@@ -24,7 +26,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
     null
   );
   const [driverId, setDriverId] = useState(user?.uid || "");
-  const [busId, setBusId] = useState("BUS001");
+  const [busId, setBusId] = useState("");
   const [stopTracking, setStopTracking] = useState<(() => void) | null>(null);
 
   // Update driverId when user changes
@@ -33,6 +35,23 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
       setDriverId(user.uid);
     }
   }, [user]);
+
+  // Fetch assigned bus from Firestore
+  const fetchAssignedBus = async () => {
+    if (!user?.uid) return;
+
+    try {
+      const userDoc = await getDoc(doc(firestore, "users", user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.assignedShuttleId) {
+          setBusId(userData.assignedShuttleId);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching assigned bus:", error);
+    }
+  };
 
   const handleSignOut = async () => {
     // Stop location tracking before signing out
@@ -51,7 +70,10 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
   useEffect(() => {
     // Get initial location
     getCurrentLocation().then(setCurrentLocation);
-  }, []);
+
+    // Fetch assigned bus
+    fetchAssignedBus();
+  }, [user]);
 
   const startTracking = async () => {
     try {
@@ -116,14 +138,19 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
         <View className="flex-1 justify-center">
           {!isTracking ? (
             <TouchableOpacity
-              className="theme-button-primary p-8 rounded-[12px] items-center"
+              className={`p-8 rounded-[12px] items-center ${
+                busId ? "theme-button-primary" : "bg-[#94a3b8]"
+              }`}
               onPress={startTracking}
+              disabled={!busId}
             >
               <Text className="text-white text-2xl font-bold mb-2">
                 ▶️ Start Sharing Location
               </Text>
               <Text className="text-white text-base opacity-90">
-                Students will see your location in real-time
+                {busId
+                  ? "Students will see your location in real-time"
+                  : "You need to be assigned to a bus first"}
               </Text>
             </TouchableOpacity>
           ) : (
@@ -138,6 +165,32 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
                 Location sharing is currently active
               </Text>
             </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Assigned Bus Info */}
+        <View className="theme-card p-4 mb-4">
+          <Text className="text-lg font-bold mb-4 theme-text-primary">
+            🚌 Bus Assignment
+          </Text>
+          {busId ? (
+            <View className="bg-[#22c55e] p-3 rounded-[8px]">
+              <Text className="text-white text-center font-bold text-lg">
+                Assigned to Bus: {busId}
+              </Text>
+              <Text className="text-white text-center text-sm opacity-90 mt-1">
+                You can now start sharing your location
+              </Text>
+            </View>
+          ) : (
+            <View className="bg-[#f59e0b] p-3 rounded-[8px]">
+              <Text className="text-white text-center font-bold text-lg">
+                No Bus Assigned
+              </Text>
+              <Text className="text-white text-center text-sm opacity-90 mt-1">
+                Contact administrator to get assigned to a bus
+              </Text>
+            </View>
           )}
         </View>
 
@@ -161,7 +214,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
           <View className="flex-row justify-between mb-2">
             <Text className="text-base theme-text-secondary">Bus ID:</Text>
             <Text className="text-base font-bold theme-text-primary">
-              {busId}
+              {busId || "Not assigned"}
             </Text>
           </View>
           <View className="flex-row justify-between mb-2">
