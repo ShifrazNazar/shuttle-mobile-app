@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -67,6 +67,10 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
   );
   const [selectedRoute, setSelectedRoute] = useState<string>("");
   const [routesLoading, setRoutesLoading] = useState(true);
+  const stopAlertShownRef = useRef<string | null>(null);
+  const isMountedRef = useRef(true);
+  const mapRef = useRef<MapView | null>(null);
+  const mapReadyRef = useRef(false);
 
   const handleSignOut = async () => {
     const result = await signOut();
@@ -505,6 +509,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     const unsubscribeRoutes = setupRouteAssignmentsListener();
 
     return () => {
+      isMountedRef.current = false;
       // Cleanup tracking state
       setIsTracking(false);
       setBusLocation(null);
@@ -526,6 +531,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     // Set bus ID and tracking state immediately
     setBusId(busIdToTrack);
     setIsTracking(true);
+    stopAlertShownRef.current = null;
 
     // Show success message
     Alert.alert("Success", `Now tracking bus: ${busIdToTrack}`);
@@ -542,18 +548,36 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     if (!isTracking || !busId || !busId.trim()) return;
 
     const unsubscribe = subscribeToBusLocation(busId, (location) => {
-      if (location) {
+      if (!isMountedRef.current) return;
+      if (
+        location &&
+        typeof location.latitude === "number" &&
+        typeof location.longitude === "number" &&
+        Number.isFinite(location.latitude) &&
+        Number.isFinite(location.longitude)
+      ) {
         setBusLocation(location);
       } else {
         // Driver stopped sharing location
+        const currentBusId = busId;
         setBusLocation(null);
-        setIsTracking(false);
+        setIsTracking((prev) => (prev ? false : prev));
         setBusId(""); // Reset bus ID
-        Alert.alert(
-          "Driver Stopped Sharing",
-          `Bus ${busId} has stopped sharing location. You can select another active bus to track.`,
-          [{ text: "OK" }]
-        );
+        if (stopAlertShownRef.current !== currentBusId && currentBusId) {
+          stopAlertShownRef.current = currentBusId;
+          try {
+            setTimeout(() => {
+              if (!isMountedRef.current) return;
+              Alert.alert(
+                "Driver Stopped Sharing",
+                `Bus ${currentBusId} has stopped sharing location. You can select another active bus to track.`,
+                [{ text: "OK" }]
+              );
+            }, 100);
+          } catch (e) {
+            // no-op: avoid crashing on alert edge-cases
+          }
+        }
       }
     });
 
@@ -562,8 +586,21 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     };
   }, [isTracking, busId]);
 
+  const defaultRegion = {
+    latitude: 3.055465,
+    longitude: 101.700363,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  };
+
   const getMapRegion = () => {
-    if (busLocation && busLocation.latitude && busLocation.longitude) {
+    if (
+      busLocation &&
+      typeof busLocation.latitude === "number" &&
+      typeof busLocation.longitude === "number" &&
+      Number.isFinite(busLocation.latitude) &&
+      Number.isFinite(busLocation.longitude)
+    ) {
       return {
         latitude: busLocation.latitude,
         longitude: busLocation.longitude,
@@ -571,7 +608,14 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
         longitudeDelta: 0.01,
       };
     }
-    if (userLocation && userLocation.coords) {
+    if (
+      userLocation &&
+      userLocation.coords &&
+      typeof userLocation.coords.latitude === "number" &&
+      typeof userLocation.coords.longitude === "number" &&
+      Number.isFinite(userLocation.coords.latitude) &&
+      Number.isFinite(userLocation.coords.longitude)
+    ) {
       return {
         latitude: userLocation.coords.latitude,
         longitude: userLocation.coords.longitude,
@@ -579,14 +623,24 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
         longitudeDelta: 0.01,
       };
     }
-    // Default region (Asia Pacific University)
-    return {
-      latitude: 3.055465,
-      longitude: 101.700363,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    };
+    return defaultRegion;
   };
+
+  useEffect(() => {
+    const target = getMapRegion();
+    if (mapReadyRef.current && mapRef.current) {
+      try {
+        mapRef.current.animateToRegion(target, 500);
+      } catch (e) {
+        console.error("Error animating to region:", e);
+      }
+    }
+  }, [
+    busLocation?.latitude,
+    busLocation?.longitude,
+    userLocation?.coords?.latitude,
+    userLocation?.coords?.longitude,
+  ]);
 
   return (
     <SafeAreaView className="flex-1 theme-bg">
@@ -909,36 +963,54 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
           <View className="h-80">
             <MapView
               style={{ flex: 1 }}
-              region={getMapRegion()}
+              key={`map-${isTracking ? busId || "idle" : "idle"}`}
+              ref={(ref) => (mapRef.current = ref)}
+              onMapReady={() => {
+                mapReadyRef.current = true;
+                const initial = getMapRegion();
+                try {
+                  mapRef.current?.animateToRegion(initial, 0);
+                } catch (e) {
+                  console.error("Error animating to region:", e);
+                }
+              }}
+              initialRegion={defaultRegion}
               showsUserLocation={true}
               showsMyLocationButton={true}
             >
               {/* Show tracked bus */}
-              {busLocation && busLocation.latitude && busLocation.longitude && (
-                <Marker
-                  coordinate={{
-                    latitude: busLocation.latitude,
-                    longitude: busLocation.longitude,
-                  }}
-                  title={`Bus ${busLocation.busId}`}
-                  description={`Driver: ${busLocation.driverEmail || busLocation.driverId}`}
-                  pinColor="red"
-                />
-              )}
+              {busLocation &&
+                typeof busLocation.latitude === "number" &&
+                typeof busLocation.longitude === "number" && (
+                  <Marker
+                    coordinate={{
+                      latitude: busLocation.latitude,
+                      longitude: busLocation.longitude,
+                    }}
+                    title={`Bus ${busLocation.busId}`}
+                    description={`Driver: ${busLocation.driverEmail || busLocation.driverId}`}
+                    pinColor="red"
+                  />
+                )}
 
               {/* Show all active buses */}
-              {Object.entries(allBuses).map(([id, location]) => (
-                <Marker
-                  key={id}
-                  coordinate={{
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                  }}
-                  title={`Bus ${location.busId}`}
-                  description={`Driver: ${location.driverEmail || location.driverId}`}
-                  pinColor={id === busId ? "red" : "blue"}
-                />
-              ))}
+              {Object.entries(allBuses).map(([id, location]) => {
+                const latOk = typeof location.latitude === "number";
+                const lngOk = typeof location.longitude === "number";
+                if (!latOk || !lngOk) return null;
+                return (
+                  <Marker
+                    key={id}
+                    coordinate={{
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                    }}
+                    title={`Bus ${location.busId}`}
+                    description={`Driver: ${location.driverEmail || location.driverId}`}
+                    pinColor={id === busId ? "red" : "blue"}
+                  />
+                );
+              })}
             </MapView>
           </View>
         </View>

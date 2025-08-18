@@ -67,11 +67,11 @@ export const subscribeToBusLocation = (
 ) => {
   const locationRef = ref(database, `activeDrivers`);
 
-  onValue(locationRef, (snapshot) => {
+  // Keep a stable handler reference so we can detach only this listener
+  const handleValue = (snapshot: any) => {
     const data = snapshot.val();
     if (data) {
-      // Find the specific bus and ensure it's active
-      const busData = Object.values(data).find(
+      const busData = (Object.values(data) as any[]).find(
         (location: any) =>
           location.busId === busId && location.isActive === true
       ) as LocationData | undefined;
@@ -79,11 +79,13 @@ export const subscribeToBusLocation = (
     } else {
       callback(null);
     }
-  });
+  };
 
-  // Return unsubscribe function
+  onValue(locationRef, handleValue);
+
+  // Return unsubscribe function that detaches only this specific callback
   return () => {
-    off(locationRef);
+    off(locationRef, "value", handleValue);
   };
 };
 
@@ -93,24 +95,25 @@ export const getActiveBuses = (
 ) => {
   const locationsRef = ref(database, "activeDrivers");
 
-  onValue(locationsRef, (snapshot) => {
+  const handleValue = (snapshot: any) => {
     const data = snapshot.val();
     if (data) {
-      // Filter only active drivers and convert to busId-based structure
       const activeBuses: Record<string, LocationData> = {};
       Object.entries(data).forEach(([driverId, location]: [string, any]) => {
         if (location.isActive === true) {
-          activeBuses[location.busId] = location as LocationData;
+          activeBuses[(location as any).busId] = location as LocationData;
         }
       });
       callback(activeBuses);
     } else {
       callback({});
     }
-  });
+  };
+
+  onValue(locationsRef, handleValue);
 
   return () => {
-    off(locationsRef);
+    off(locationsRef, "value", handleValue);
   };
 };
 
@@ -120,13 +123,12 @@ export const getAllActiveDrivers = (
 ) => {
   const driversRef = ref(database, "activeDrivers");
 
-  onValue(driversRef, (snapshot) => {
+  const handleValue = (snapshot: any) => {
     const data = snapshot.val();
     if (data) {
-      // Filter only active drivers
       const activeDrivers: Record<string, LocationData> = {};
       Object.entries(data).forEach(([driverId, location]: [string, any]) => {
-        if (location.isActive) {
+        if ((location as any).isActive) {
           activeDrivers[driverId] = location as LocationData;
         }
       });
@@ -134,9 +136,11 @@ export const getAllActiveDrivers = (
     } else {
       callback({});
     }
-  });
+  };
+
+  onValue(driversRef, handleValue);
 
   return () => {
-    off(driversRef);
+    off(driversRef, "value", handleValue);
   };
 };
