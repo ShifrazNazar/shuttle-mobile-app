@@ -29,7 +29,7 @@ export default function Index() {
           </Text>
         </View>
 
-        <View className="space-y-4 mt-8">
+        <View className="flex-col gap-4 mt-8">
           {/* Driver Card */}
           <TouchableOpacity
             className="bg-white p-5 rounded-[12px] border border-[#e5e7eb] shadow-sm"

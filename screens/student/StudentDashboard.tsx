@@ -666,78 +666,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
         </View>
 
         {/* Active Buses Section */}
-        {Object.keys(allBuses).length > 0 ? (
-          <View className="theme-card p-5 m-5">
-            <Text className="text-lg font-bold mb-3 theme-text-primary">
-              🚌 Active Buses
-            </Text>
-            <Text className="text-sm theme-text-secondary mb-4">
-              Click on a bus to start tracking it
-            </Text>
-            {Object.entries(allBuses).map(([id, location]) => (
-              <TouchableOpacity
-                key={id}
-                className={`p-4 rounded-[12px] mb-3 border shadow-sm ${
-                  busId === location.busId && isTracking
-                    ? "border-[#2563eb] bg-[#eff6ff]"
-                    : "border-[#e5e7eb] bg-white"
-                }`}
-                onPress={() => {
-                  if (busId === location.busId && isTracking) {
-                    // Stop tracking if already tracking this bus
-                    stopTrackingBus();
-                  } else {
-                    // Start tracking this bus immediately
-                    startTrackingBusWithId(location.busId);
-                  }
-                }}
-              >
-                <View className="flex-row justify-between items-center">
-                  <View className="flex-1">
-                    <Text className="font-semibold theme-text-primary text-lg">
-                      Bus {location.busId}
-                    </Text>
-                    <Text className="text-sm theme-text-secondary">
-                      Driver: {location.driverEmail || location.driverId}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center gap-2">
-                    <View className="bg-[#22c55e] px-2 py-1 rounded-full">
-                      <Text className="text-white text-xs font-medium">
-                        Active
-                      </Text>
-                    </View>
-                    {busId === location.busId && isTracking ? (
-                      <View className="bg-[#ef4444] px-3 py-1 rounded-full">
-                        <Text className="text-white text-xs font-medium">
-                          Tracking
-                        </Text>
-                      </View>
-                    ) : (
-                      <View className="bg-[#2563eb] px-3 py-1 rounded-full">
-                        <Text className="text-white text-xs font-medium">
-                          Track
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ) : (
-          <View className="theme-card p-5 m-5">
-            <Text className="text-lg font-bold mb-3 theme-text-primary">
-              🚌 No Active Buses
-            </Text>
-            <Text className="text-sm theme-text-secondary text-center">
-              No drivers are currently sharing their location
-            </Text>
-            <Text className="text-xs text-gray-500 text-center mt-2">
-              Check back later when drivers start their routes
-            </Text>
-          </View>
-        )}
 
         {/* Routes Section */}
         <View className="theme-card p-5 m-5">
@@ -802,7 +730,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
               </Text>
             </View>
           ) : (
-            <View className="space-y-3">
+            <View className="flex-col gap-3">
               {routes
                 .filter(
                   (route) => !selectedRoute || route.routeId === selectedRoute
@@ -867,7 +795,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
                           <Text className="text-sm font-medium text-gray-700 mb-2">
                             🚗 Active Drivers Coming Your Way:
                           </Text>
-                          <View className="space-y-2">
+                          <View className="flex-col gap-2">
                             {activeBuses.map(([id, location]) => (
                               <View
                                 key={id}
@@ -1019,7 +947,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
           <Text className="text-lg font-bold mb-4 text-gray-800">
             📊 Status
           </Text>
-          <View className="space-y-3">
+          <View className="flex-col gap-3">
             <View className="flex-row justify-between items-center">
               <Text className="text-base text-gray-600">Tracking:</Text>
               <View

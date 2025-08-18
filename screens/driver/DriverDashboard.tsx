@@ -311,7 +311,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
           <Text className="text-lg font-bold mb-3 theme-text-primary">
             📊 Status
           </Text>
-          <View className="space-y-3">
+          <View className="flex-col gap-3">
             <View className="flex-row justify-between items-center">
               <Text className="text-base theme-text-secondary">Location:</Text>
               <View

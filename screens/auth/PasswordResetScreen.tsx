@@ -70,7 +70,7 @@ const PasswordResetScreen: React.FC = () => {
           </Text>
         </View>
 
-        <View className="space-y-4">
+        <View className="flex-col gap-4">
           <View>
             <Text className="theme-text-primary mb-2 font-medium">
               New Password
