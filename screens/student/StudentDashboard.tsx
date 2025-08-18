@@ -56,7 +56,7 @@ interface StudentDashboardProps {
 
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
   const { signOut, user } = useAuth();
-  const [busId, setBusId] = useState("BUS001");
+  const [busId, setBusId] = useState("");
   const [busLocation, setBusLocation] = useState<LocationData | null>(null);
   const [userLocation, setUserLocation] = useState<LocationObject | null>(null);
   const [allBuses, setAllBuses] = useState<Record<string, LocationData>>({});
@@ -459,10 +459,10 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
   // Get active buses for a specific route
   const getActiveBusesByRoute = (routeId: string) => {
     const routeDrivers = getDriversByRouteId(routeId);
-    const routeBusIds = routeDrivers.map((d) => d.busId);
+    const routeBusIds = routeDrivers.map((d) => d.busId).filter(Boolean);
 
-    return Object.entries(allBuses).filter(([id, location]) =>
-      routeBusIds.includes(location.busId)
+    return Object.entries(allBuses).filter(
+      ([id, location]) => location.busId && routeBusIds.includes(location.busId)
     );
   };
 
@@ -505,6 +505,11 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     const unsubscribeRoutes = setupRouteAssignmentsListener();
 
     return () => {
+      // Cleanup tracking state
+      setIsTracking(false);
+      setBusLocation(null);
+      setBusId("");
+
       unsubscribeAllBuses();
       if (unsubscribeRoutes) {
         unsubscribeRoutes();
@@ -512,27 +517,44 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     };
   }, []);
 
-  const startTrackingBus = () => {
-    if (!busId.trim()) {
-      Alert.alert("Error", "Please enter a Bus ID");
+  const startTrackingBusWithId = (busIdToTrack: string) => {
+    if (!busIdToTrack.trim()) {
+      Alert.alert("Error", "Invalid bus ID");
       return;
     }
 
+    // Set bus ID and tracking state immediately
+    setBusId(busIdToTrack);
     setIsTracking(true);
-    Alert.alert("Success", `Now tracking bus: ${busId}`);
+
+    // Show success message
+    Alert.alert("Success", `Now tracking bus: ${busIdToTrack}`);
   };
 
   const stopTrackingBus = () => {
     setIsTracking(false);
     setBusLocation(null);
+    setBusId(""); // Reset bus ID when stopping
     Alert.alert("Success", "Stopped tracking bus");
   };
 
   useEffect(() => {
-    if (!isTracking || !busId) return;
+    if (!isTracking || !busId || !busId.trim()) return;
 
     const unsubscribe = subscribeToBusLocation(busId, (location) => {
-      setBusLocation(location);
+      if (location) {
+        setBusLocation(location);
+      } else {
+        // Driver stopped sharing location
+        setBusLocation(null);
+        setIsTracking(false);
+        setBusId(""); // Reset bus ID
+        Alert.alert(
+          "Driver Stopped Sharing",
+          `Bus ${busId} has stopped sharing location. You can select another active bus to track.`,
+          [{ text: "OK" }]
+        );
+      }
     });
 
     return () => {
@@ -541,7 +563,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
   }, [isTracking, busId]);
 
   const getMapRegion = () => {
-    if (busLocation) {
+    if (busLocation && busLocation.latitude && busLocation.longitude) {
       return {
         latitude: busLocation.latitude,
         longitude: busLocation.longitude,
@@ -549,7 +571,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
         longitudeDelta: 0.01,
       };
     }
-    if (userLocation) {
+    if (userLocation && userLocation.coords) {
       return {
         latitude: userLocation.coords.latitude,
         longitude: userLocation.coords.longitude,
@@ -557,7 +579,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
         longitudeDelta: 0.01,
       };
     }
-    // Default region (you can change this to your campus location)
+    // Default region (Asia Pacific University)
     return {
       latitude: 3.055465,
       longitude: 101.700363,
@@ -611,9 +633,8 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
                     // Stop tracking if already tracking this bus
                     stopTrackingBus();
                   } else {
-                    // Start tracking this bus
-                    setBusId(location.busId);
-                    startTrackingBus();
+                    // Start tracking this bus immediately
+                    startTrackingBusWithId(location.busId);
                   }
                 }}
               >
@@ -811,7 +832,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
                                   </View>
                                   <TouchableOpacity
                                     className="bg-[#2563eb] px-2 py-1 rounded-[4px]"
-                                    onPress={() => setBusId(location.busId)}
+                                    onPress={() =>
+                                      startTrackingBusWithId(location.busId)
+                                    }
                                   >
                                     <Text className="text-white text-xs font-medium">
                                       Track
@@ -820,9 +843,11 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
                                 </View>
                                 <Text className="text-xs text-[#6b7280] mt-1">
                                   Last update:{" "}
-                                  {new Date(
-                                    location.timestamp
-                                  ).toLocaleTimeString()}
+                                  {location.timestamp
+                                    ? new Date(
+                                        location.timestamp
+                                      ).toLocaleTimeString()
+                                    : "Unknown"}
                                 </Text>
                               </View>
                             ))}
@@ -876,7 +901,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
               🗺️ Live Tracking
             </Text>
             <Text className="text-sm text-gray-600">
-              {busLocation
+              {busLocation && busLocation.busId
                 ? `Tracking Bus ${busLocation.busId}`
                 : "Click on an active bus above to start tracking"}
             </Text>
@@ -889,7 +914,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
               showsMyLocationButton={true}
             >
               {/* Show tracked bus */}
-              {busLocation && (
+              {busLocation && busLocation.latitude && busLocation.longitude && (
                 <Marker
                   coordinate={{
                     latitude: busLocation.latitude,
@@ -938,7 +963,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
             <View className="flex-row justify-between items-center">
               <Text className="text-base text-gray-600">Tracking:</Text>
               <Text className="text-base font-bold">
-                {isTracking ? `Bus ${busId}` : "None"}
+                {isTracking && busLocation ? `Bus ${busId}` : "None"}
               </Text>
             </View>
             <View className="flex-row justify-between items-center">
