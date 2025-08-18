@@ -18,6 +18,37 @@ import { LocationObject } from "expo-location";
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
+import { firestore } from "../../services/firebase";
+
+interface RouteData {
+  routeId: string;
+  routeName: string;
+  origin: string;
+  destination: string;
+  operatingDays: string[];
+  schedule: string[];
+  specialNotes?: string;
+}
+
+interface RouteAssignment {
+  id: string;
+  routeId: string;
+  routeName: string;
+  driverId: string;
+  driverEmail: string;
+  driverUsername: string;
+  busId: string;
+  assignedAt: any;
+  status: "active" | "inactive" | "temporary";
+}
 
 interface StudentDashboardProps {
   navigation: any;
@@ -30,6 +61,12 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
   const [userLocation, setUserLocation] = useState<LocationObject | null>(null);
   const [allBuses, setAllBuses] = useState<Record<string, LocationData>>({});
   const [isTracking, setIsTracking] = useState(false);
+  const [routes, setRoutes] = useState<RouteData[]>([]);
+  const [routeAssignments, setRouteAssignments] = useState<RouteAssignment[]>(
+    []
+  );
+  const [selectedRoute, setSelectedRoute] = useState<string>("");
+  const [routesLoading, setRoutesLoading] = useState(true);
 
   const handleSignOut = async () => {
     const result = await signOut();
@@ -38,6 +75,418 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     } else {
       router.replace("/");
     }
+  };
+
+  // Fetch routes data from Firestore
+  const fetchRoutesData = async () => {
+    try {
+      // In a real app, you'd fetch this from Firestore
+      // For now, we'll use the same static data structure as the admin routes page
+      const routesData: RouteData[] = [
+        {
+          routeId: "R001",
+          routeName: "LRT Bukit Jalil to APU",
+          origin: "LRT - BUKIT JALIL",
+          destination: "APU",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: [
+            "07:30",
+            "07:40",
+            "07:45",
+            "07:50",
+            "07:55",
+            "08:00",
+            "08:05",
+            "08:15",
+            "08:20",
+            "08:25",
+            "08:30",
+            "08:35",
+            "08:45",
+            "09:00",
+            "09:10",
+            "09:20",
+            "09:30",
+            "09:50",
+            "10:00",
+            "10:05",
+            "10:10",
+            "10:15",
+            "10:30",
+            "10:35",
+            "10:45",
+            "11:00",
+            "11:05",
+            "11:10",
+            "11:25",
+            "11:40",
+            "12:10",
+            "12:30",
+            "12:45",
+            "13:00",
+            "13:15",
+            "13:20",
+            "13:25",
+            "13:40",
+            "14:10",
+            "14:25",
+            "14:40",
+            "15:05",
+            "15:20",
+            "15:40",
+            "15:55",
+            "16:10",
+            "16:25",
+            "17:10",
+            "17:20",
+            "17:30",
+            "18:20",
+          ],
+        },
+        {
+          routeId: "R002",
+          routeName: "APU to LRT Bukit Jalil",
+          origin: "APU",
+          destination: "LRT - BUKIT JALIL",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: [
+            "10:35",
+            "10:45",
+            "11:30",
+            "11:50",
+            "12:10",
+            "12:35",
+            "12:50",
+            "13:05",
+            "13:10",
+            "13:15",
+            "13:30",
+            "14:00",
+            "14:15",
+            "14:30",
+            "14:45",
+            "15:10",
+            "15:20",
+            "15:30",
+            "15:45",
+            "15:50",
+            "16:00",
+            "16:15",
+            "16:30",
+            "16:45",
+            "16:50",
+            "17:00",
+            "17:10",
+            "17:20",
+            "17:30",
+            "17:40",
+            "18:00",
+            "18:10",
+            "18:15",
+            "18:30",
+            "18:40",
+            "18:55",
+            "19:15",
+            "20:45",
+            "21:45",
+          ],
+        },
+        {
+          routeId: "R003",
+          routeName: "M Vertica to APU",
+          origin: "M VERTICA",
+          destination: "APU",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: ["07:45", "09:45", "11:15", "14:30"],
+        },
+        {
+          routeId: "R004",
+          routeName: "APU to M Vertica",
+          origin: "APU",
+          destination: "M VERTICA",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: ["14:00", "15:00", "16:45", "17:45", "18:45"],
+        },
+        {
+          routeId: "R005",
+          routeName: "City of Green to APU",
+          origin: "CITY OF GREEN",
+          destination: "APU",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: [
+            "07:45",
+            "08:20",
+            "09:00",
+            "09:45",
+            "11:00",
+            "12:00",
+            "13:00",
+            "15:00",
+          ],
+        },
+        {
+          routeId: "R006",
+          routeName: "APU to City of Green",
+          origin: "APU",
+          destination: "CITY OF GREEN",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: [
+            "10:35",
+            "11:30",
+            "12:30",
+            "14:30",
+            "15:30",
+            "16:00",
+            "16:30",
+            "17:40",
+            "18:00",
+            "18:40",
+            "19:00",
+            "20:45",
+            "21:45",
+          ],
+        },
+        {
+          routeId: "R007",
+          routeName: "Bloomsvale to APU",
+          origin: "BLOOMSVALE",
+          destination: "APU",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: ["07:45", "10:15"],
+        },
+        {
+          routeId: "R008",
+          routeName: "APU to Bloomsvale",
+          origin: "APU",
+          destination: "BLOOMSVALE",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: ["15:30", "18:30"],
+        },
+        {
+          routeId: "R009",
+          routeName: "Fortune Park to APU",
+          origin: "FORTUNE PARK",
+          destination: "APU",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: [
+            "08:00",
+            "08:15",
+            "09:00",
+            "09:30",
+            "10:00",
+            "10:15",
+            "11:00",
+            "11:30",
+            "12:00",
+            "13:30",
+            "14:40",
+            "15:40",
+            "16:20",
+            "16:40",
+            "17:40",
+            "18:10",
+          ],
+        },
+        {
+          routeId: "R010",
+          routeName: "APU to Fortune Park",
+          origin: "APU",
+          destination: "FORTUNE PARK",
+          operatingDays: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          schedule: [
+            "10:30",
+            "11:25",
+            "13:00",
+            "14:10",
+            "15:00",
+            "15:50",
+            "16:20",
+            "17:00",
+            "17:40",
+            "18:00",
+            "18:40",
+            "19:15",
+          ],
+        },
+        {
+          routeId: "R011",
+          routeName: "APU to Mosque (Friday Only)",
+          origin: "APU",
+          destination: "MOSQUE",
+          operatingDays: ["Friday"],
+          schedule: ["12:30"],
+          specialNotes: "Friday prayer service only",
+        },
+        {
+          routeId: "R012",
+          routeName: "Mosque to APU (Friday Only)",
+          origin: "MOSQUE",
+          destination: "APU",
+          operatingDays: ["Friday"],
+          schedule: ["13:30"],
+          specialNotes: "Friday prayer service only",
+        },
+      ];
+
+      setRoutes(routesData);
+    } catch (error) {
+      console.error("Error fetching routes data:", error);
+    }
+  };
+
+  // Setup route assignments listener
+  const setupRouteAssignmentsListener = () => {
+    try {
+      const assignmentsRef = collection(firestore, "routeAssignments");
+      const assignmentsQuery = query(
+        assignmentsRef,
+        where("status", "==", "active")
+      );
+
+      const unsubscribe = onSnapshot(
+        assignmentsQuery,
+        (snapshot) => {
+          const assignments: RouteAssignment[] = [];
+          snapshot.forEach((doc) => {
+            assignments.push({
+              id: doc.id,
+              ...doc.data(),
+            } as RouteAssignment);
+          });
+
+          setRouteAssignments(assignments);
+          setRoutesLoading(false);
+        },
+        (error) => {
+          console.error("Error listening to route assignments:", error);
+          setRoutesLoading(false);
+        }
+      );
+
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error setting up route assignments listener:", error);
+      setRoutesLoading(false);
+      return null;
+    }
+  };
+
+  // Get drivers assigned to a specific route
+  const getDriversByRouteId = (routeId: string) => {
+    return routeAssignments.filter((a) => a.routeId === routeId);
+  };
+
+  // Get active buses for a specific route
+  const getActiveBusesByRoute = (routeId: string) => {
+    const routeDrivers = getDriversByRouteId(routeId);
+    const routeBusIds = routeDrivers.map((d) => d.busId);
+
+    return Object.entries(allBuses).filter(([id, location]) =>
+      routeBusIds.includes(location.busId)
+    );
+  };
+
+  // Get route status (operating today or not)
+  const getRouteStatus = (route: RouteData) => {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+    const isOperatingToday = route.operatingDays.includes(today);
+
+    if (!isOperatingToday)
+      return { status: "inactive", text: "Not Operating Today" };
+
+    const now = new Date();
+    const currentTime = now.toLocaleTimeString("en-US", {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const nextDeparture = route.schedule.find((time) => time > currentTime);
+    if (nextDeparture) {
+      return { status: "active", text: `Next: ${nextDeparture}` };
+    }
+
+    return { status: "completed", text: "Service Ended" };
   };
 
   useEffect(() => {
@@ -49,8 +498,17 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
       setAllBuses(buses);
     });
 
+    // Fetch routes data
+    fetchRoutesData();
+
+    // Setup route assignments listener
+    const unsubscribeRoutes = setupRouteAssignmentsListener();
+
     return () => {
       unsubscribeAllBuses();
+      if (unsubscribeRoutes) {
+        unsubscribeRoutes();
+      }
     };
   }, []);
 
@@ -115,20 +573,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
         <View className="bg-white border-b border-[#e5e7eb] px-6 pt-12 pb-6">
           <View className="flex-row justify-between items-center">
             <View className="flex-1">
-              <Text className="text-2xl font-bold theme-text-primary mb-1">
+              <Text className="text-2xl font-bold theme-text-primary mb-2">
                 🎓 Student Dashboard
               </Text>
               <Text className="theme-text-secondary text-base">
                 Track your shuttle in real-time
               </Text>
-              {user?.email && (
-                <Text className="theme-text-muted text-sm mt-1">
-                  Logged in as: {user.email}
-                </Text>
-              )}
             </View>
             <TouchableOpacity
-              className="bg-[#ef4444] px-4 py-2 rounded-[10px]"
+              className="bg-[#ef4444] px-4 py-2 rounded-[12px]"
               onPress={handleSignOut}
             >
               <Text className="text-white font-semibold text-sm">Sign Out</Text>
@@ -136,104 +589,296 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
           </View>
         </View>
 
-        <View className="theme-card p-5 m-5">
-          <Text className="text-base font-bold mb-2 theme-text-primary">
-            🚌 Bus ID to Track:
-          </Text>
-          <TextInput
-            className="theme-input mb-4"
-            placeholder="Enter Bus ID (e.g., BUS001)"
-            placeholderTextColor="#94a3b8"
-            value={busId}
-            onChangeText={setBusId}
-          />
-          {!isTracking ? (
-            <TouchableOpacity
-              className={`p-4 rounded-[10px] items-center ${
-                busId.trim() ? "theme-button-primary" : "bg-[#94a3b8]"
-              }`}
-              onPress={startTrackingBus}
-              disabled={!busId.trim()}
-            >
-              <Text className="text-white text-lg font-bold">
-                🔍 Track Bus {busId.trim() ? `(${busId})` : ""}
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              className="bg-[#ef4444] p-4 rounded-[10px] items-center"
-              onPress={stopTrackingBus}
-            >
-              <Text className="text-white text-lg font-bold">
-                ⏹️ Stop Tracking {busId}
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          {/* Bus Status Info */}
-          {busId.trim() && (
-            <View className="mt-4 p-3 bg-[#f8fafc] rounded-[8px] border border-[#e2e8f0]">
-              <Text className="text-sm theme-text-secondary text-center">
-                {isTracking
-                  ? `Currently tracking Bus ${busId}`
-                  : `Ready to track Bus ${busId}`}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Available Buses */}
-        {Object.keys(allBuses).length > 0 && (
+        {/* Active Buses Section */}
+        {Object.keys(allBuses).length > 0 ? (
           <View className="theme-card p-5 m-5">
-            <Text className="text-base font-bold mb-3 theme-text-primary">
-              🚌 Available Buses to Track
+            <Text className="text-lg font-bold mb-3 theme-text-primary">
+              🚌 Active Buses
             </Text>
-            <Text className="text-sm theme-text-secondary mb-3">
-              Tap on a bus to start tracking it
+            <Text className="text-sm theme-text-secondary mb-4">
+              Click on a bus to start tracking it
             </Text>
             {Object.entries(allBuses).map(([id, location]) => (
               <TouchableOpacity
                 key={id}
-                className={`p-3 rounded-[8px] mb-2 border ${
-                  busId === location.busId
+                className={`p-4 rounded-[12px] mb-3 border shadow-sm ${
+                  busId === location.busId && isTracking
                     ? "border-[#2563eb] bg-[#eff6ff]"
                     : "border-[#e5e7eb] bg-white"
                 }`}
-                onPress={() => setBusId(location.busId)}
+                onPress={() => {
+                  if (busId === location.busId && isTracking) {
+                    // Stop tracking if already tracking this bus
+                    stopTrackingBus();
+                  } else {
+                    // Start tracking this bus
+                    setBusId(location.busId);
+                    startTrackingBus();
+                  }
+                }}
               >
                 <View className="flex-row justify-between items-center">
-                  <View>
-                    <Text className="font-semibold theme-text-primary">
+                  <View className="flex-1">
+                    <Text className="font-semibold theme-text-primary text-lg">
                       Bus {location.busId}
                     </Text>
                     <Text className="text-sm theme-text-secondary">
                       Driver: {location.driverEmail || location.driverId}
                     </Text>
                   </View>
-                  <View className="bg-[#22c55e] px-2 py-1 rounded-[4px]">
-                    <Text className="text-white text-xs font-medium">
-                      Active
-                    </Text>
+                  <View className="flex-row items-center gap-2">
+                    <View className="bg-[#22c55e] px-2 py-1 rounded-full">
+                      <Text className="text-white text-xs font-medium">
+                        Active
+                      </Text>
+                    </View>
+                    {busId === location.busId && isTracking ? (
+                      <View className="bg-[#ef4444] px-3 py-1 rounded-full">
+                        <Text className="text-white text-xs font-medium">
+                          Tracking
+                        </Text>
+                      </View>
+                    ) : (
+                      <View className="bg-[#2563eb] px-3 py-1 rounded-full">
+                        <Text className="text-white text-xs font-medium">
+                          Track
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </View>
               </TouchableOpacity>
             ))}
           </View>
+        ) : (
+          <View className="theme-card p-5 m-5">
+            <Text className="text-lg font-bold mb-3 theme-text-primary">
+              🚌 No Active Buses
+            </Text>
+            <Text className="text-sm theme-text-secondary text-center">
+              No drivers are currently sharing their location
+            </Text>
+            <Text className="text-xs text-gray-500 text-center mt-2">
+              Check back later when drivers start their routes
+            </Text>
+          </View>
         )}
 
+        {/* Routes Section */}
+        <View className="theme-card p-5 m-5">
+          <Text className="text-lg font-bold mb-3 theme-text-primary">
+            🛣️ Routes & Drivers
+          </Text>
+          <Text className="text-sm theme-text-secondary mb-4">
+            See which drivers are active on each route
+          </Text>
+
+          {/* Route Filter */}
+          <View className="mb-4">
+            <Text className="text-sm font-medium mb-2 theme-text-primary">
+              Filter by Route:
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              <TouchableOpacity
+                className={`px-3 py-2 rounded-[8px] border ${
+                  selectedRoute === ""
+                    ? "bg-[#2563eb] border-[#2563eb]"
+                    : "bg-white border-[#e5e7eb]"
+                }`}
+                onPress={() => setSelectedRoute("")}
+              >
+                <Text
+                  className={`text-sm font-medium ${
+                    selectedRoute === "" ? "text-white" : "text-gray-600"
+                  }`}
+                >
+                  All Routes
+                </Text>
+              </TouchableOpacity>
+              {routes.map((route) => (
+                <TouchableOpacity
+                  key={route.routeId}
+                  className={`px-3 py-2 rounded-[8px] border ${
+                    selectedRoute === route.routeId
+                      ? "bg-[#2563eb] border-[#2563eb]"
+                      : "bg-white border-[#e5e7eb]"
+                  }`}
+                  onPress={() => setSelectedRoute(route.routeId)}
+                >
+                  <Text
+                    className={`text-sm font-medium ${
+                      selectedRoute === route.routeId
+                        ? "text-white"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    {route.origin} → {route.destination}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Routes List */}
+          {routesLoading ? (
+            <View className="bg-[#f3f4f6] p-4 rounded-[8px]">
+              <Text className="text-center text-[#6b7280]">
+                Loading routes...
+              </Text>
+            </View>
+          ) : (
+            <View className="space-y-3">
+              {routes
+                .filter(
+                  (route) => !selectedRoute || route.routeId === selectedRoute
+                )
+                .map((route) => {
+                  const routeStatus = getRouteStatus(route);
+                  const routeDrivers = getDriversByRouteId(route.routeId);
+                  const activeBuses = getActiveBusesByRoute(route.routeId);
+
+                  return (
+                    <View
+                      key={route.routeId}
+                      className="bg-white p-4 rounded-[8px] border border-[#e5e7eb]"
+                    >
+                      {/* Route Header */}
+                      <View className="flex-row justify-between items-start mb-2">
+                        <View className="flex-1">
+                          <Text className="font-bold text-base text-gray-800 mb-1">
+                            {route.routeName}
+                          </Text>
+                          <Text className="text-sm text-gray-600">
+                            {route.origin} → {route.destination}
+                          </Text>
+                        </View>
+                        <View
+                          className={`px-2 py-1 rounded-[4px] ${
+                            routeStatus.status === "active"
+                              ? "bg-[#22c55e]"
+                              : routeStatus.status === "completed"
+                                ? "bg-[#6b7280]"
+                                : "bg-[#f59e0b]"
+                          }`}
+                        >
+                          <Text className="text-white text-xs font-medium">
+                            {routeStatus.text}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Route Details */}
+                      <View className="flex-row items-center gap-4 mb-3">
+                        <View className="flex-row items-center gap-1">
+                          <Text className="text-xs text-gray-500">📅</Text>
+                          <Text className="text-xs text-gray-600">
+                            {route.operatingDays.length === 7
+                              ? "Daily"
+                              : `${route.operatingDays.length} days/week`}
+                          </Text>
+                        </View>
+                        <View className="flex-row items-center gap-1">
+                          <Text className="text-xs text-gray-500">🚌</Text>
+                          <Text className="text-xs text-gray-600">
+                            {routeDrivers.length} driver
+                            {routeDrivers.length !== 1 ? "s" : ""}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Active Drivers for This Route */}
+                      {activeBuses.length > 0 && (
+                        <View className="mt-3 pt-3 border-t border-gray-200">
+                          <Text className="text-sm font-medium text-gray-700 mb-2">
+                            🚗 Active Drivers Coming Your Way:
+                          </Text>
+                          <View className="space-y-2">
+                            {activeBuses.map(([id, location]) => (
+                              <View
+                                key={id}
+                                className="bg-[#eff6ff] p-2 rounded-[6px] border border-[#dbeafe]"
+                              >
+                                <View className="flex-row justify-between items-center">
+                                  <View>
+                                    <Text className="font-medium text-[#1e40af] text-sm">
+                                      Bus {location.busId}
+                                    </Text>
+                                    <Text className="text-xs text-[#3b82f6]">
+                                      Driver:{" "}
+                                      {location.driverEmail ||
+                                        location.driverId}
+                                    </Text>
+                                  </View>
+                                  <TouchableOpacity
+                                    className="bg-[#2563eb] px-2 py-1 rounded-[4px]"
+                                    onPress={() => setBusId(location.busId)}
+                                  >
+                                    <Text className="text-white text-xs font-medium">
+                                      Track
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
+                                <Text className="text-xs text-[#6b7280] mt-1">
+                                  Last update:{" "}
+                                  {new Date(
+                                    location.timestamp
+                                  ).toLocaleTimeString()}
+                                </Text>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      )}
+
+                      {/* No Active Drivers */}
+                      {routeDrivers.length > 0 && activeBuses.length === 0 && (
+                        <View className="mt-3 pt-3 border-t border-gray-200">
+                          <View className="bg-[#fef3c7] p-2 rounded-[6px] border border-[#f59e0b]">
+                            <Text className="text-xs text-[#92400e] text-center">
+                              ⚠️ Drivers assigned but not currently active
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* No Drivers Assigned */}
+                      {routeDrivers.length === 0 && (
+                        <View className="mt-3 pt-3 border-t border-gray-200">
+                          <View className="bg-[#f3f4f6] p-2 rounded-[6px] border border-[#d1d5db]">
+                            <Text className="text-xs text-[#6b7280] text-center">
+                              No drivers currently assigned to this route
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Special Notes */}
+                      {route.specialNotes && (
+                        <View className="mt-3 pt-3 border-t border-gray-200">
+                          <View className="bg-[#fef3c7] p-2 rounded-[6px] border border-[#f59e0b]">
+                            <Text className="text-xs text-[#92400e]">
+                              ℹ️ {route.specialNotes}
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+            </View>
+          )}
+        </View>
+
         {/* Map Section */}
-        <View className="m-5 rounded-xl overflow-hidden">
+        <View className="m-5 rounded-xl overflow-hidden shadow-lg">
           <View className="bg-white p-4 rounded-t-xl">
             <Text className="text-lg font-bold text-gray-800">
-              🗺️ Live Bus Tracking
+              🗺️ Live Tracking
             </Text>
             <Text className="text-sm text-gray-600">
               {busLocation
                 ? `Tracking Bus ${busLocation.busId}`
-                : "Enter Bus ID to start tracking"}
-            </Text>
-            <Text className="text-xs text-gray-500 mt-1">
-              {Object.keys(allBuses).length} active drivers on map
+                : "Click on an active bus above to start tracking"}
             </Text>
           </View>
           <View className="h-80">
@@ -273,137 +918,40 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
           </View>
         </View>
 
-        <View className="p-5 bg-white m-5 rounded-xl">
+        <View className="p-5 bg-white m-5 rounded-xl shadow-sm">
           <Text className="text-lg font-bold mb-4 text-gray-800">
-            📊 Tracking Status
+            📊 Status
           </Text>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-base text-gray-600">Status:</Text>
-            <Text
-              className={`text-base font-bold ${
-                isTracking ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {isTracking ? "🟢 TRACKING" : "🔴 NOT TRACKING"}
-            </Text>
-          </View>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-base text-gray-600">Bus ID:</Text>
-            <Text className="text-base font-bold">{busId}</Text>
-          </View>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-base text-gray-600">Active Drivers:</Text>
-            <Text className="text-base font-bold">
-              {Object.keys(allBuses).length}
-            </Text>
-          </View>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-base text-gray-600">Your Email:</Text>
-            <Text className="text-base font-bold">
-              {user?.email || "Not logged in"}
-            </Text>
-          </View>
-        </View>
-
-        {busLocation && (
-          <View className="p-5 bg-green-50 m-5 rounded-xl">
-            <Text className="text-lg font-bold mb-4 text-gray-800">
-              🚌 Tracked Bus: {busLocation.busId}
-            </Text>
-            <View className="flex-row justify-between mb-2">
-              <Text className="text-sm text-gray-600">Driver:</Text>
-              <Text className="text-sm font-bold text-gray-800">
-                {busLocation.driverEmail || busLocation.driverId}
-              </Text>
-            </View>
-            <View className="flex-row justify-between mb-2">
-              <Text className="text-sm text-gray-600">Latitude:</Text>
-              <Text className="text-sm font-bold text-gray-800">
-                {busLocation.latitude.toFixed(6)}
-              </Text>
-            </View>
-            <View className="flex-row justify-between mb-2">
-              <Text className="text-sm text-gray-600">Longitude:</Text>
-              <Text className="text-sm font-bold text-gray-800">
-                {busLocation.longitude.toFixed(6)}
-              </Text>
-            </View>
-            <View className="flex-row justify-between mb-2">
-              <Text className="text-sm text-gray-600">Last Update:</Text>
-              <Text className="text-sm font-bold text-gray-800">
-                {new Date(busLocation.timestamp).toLocaleTimeString()}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {userLocation && (
-          <View className="p-5 bg-blue-50 m-5 rounded-xl">
-            <Text className="text-lg font-bold mb-4 text-gray-800">
-              📍 Your Location
-            </Text>
-            <View className="flex-row justify-between mb-2">
-              <Text className="text-sm text-gray-600">Latitude:</Text>
-              <Text className="text-sm font-bold text-gray-800">
-                {userLocation.coords.latitude.toFixed(6)}
-              </Text>
-            </View>
-            <View className="flex-row justify-between mb-2">
-              <Text className="text-sm text-gray-600">Longitude:</Text>
-              <Text className="text-sm font-bold text-gray-800">
-                {userLocation.coords.longitude.toFixed(6)}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {Object.keys(allBuses).length > 0 && (
-          <View className="p-5 bg-white m-5 rounded-xl">
-            <Text className="text-lg font-bold mb-4 text-gray-800">
-              🚌 All Active Drivers ({Object.keys(allBuses).length})
-            </Text>
-            {Object.entries(allBuses).map(([id, location]) => (
-              <View key={id} className="bg-gray-50 p-4 rounded-lg mb-2">
-                <Text className="text-base font-bold text-gray-800 mb-1">
-                  Bus {location.busId}
-                </Text>
-                <Text className="text-sm text-gray-600 mb-1">
-                  Driver: {location.driverEmail || location.driverId}
-                </Text>
-                <Text className="text-xs text-gray-500 mb-1">
-                  {location.latitude.toFixed(4)},{" "}
-                  {location.longitude.toFixed(4)}
-                </Text>
-                <Text className="text-xs text-gray-500">
-                  {new Date(location.timestamp).toLocaleTimeString()}
+          <View className="space-y-3">
+            <View className="flex-row justify-between items-center">
+              <Text className="text-base text-gray-600">Tracking:</Text>
+              <View
+                className={`px-3 py-1 rounded-full ${
+                  isTracking ? "bg-[#22c55e]" : "bg-[#ef4444]"
+                }`}
+              >
+                <Text className="text-white text-sm font-medium">
+                  {isTracking ? "🟢 ACTIVE" : "🔴 INACTIVE"}
                 </Text>
               </View>
-            ))}
+            </View>
+            <View className="flex-row justify-between items-center">
+              <Text className="text-base text-gray-600">Tracking:</Text>
+              <Text className="text-base font-bold">
+                {isTracking ? `Bus ${busId}` : "None"}
+              </Text>
+            </View>
+            <View className="flex-row justify-between items-center">
+              <Text className="text-base text-gray-600">Active Drivers:</Text>
+              <Text className="text-base font-bold">
+                {Object.keys(allBuses).length}
+              </Text>
+            </View>
+            <View className="flex-row justify-between items-center">
+              <Text className="text-base text-gray-600">Routes:</Text>
+              <Text className="text-base font-bold">{routes.length}</Text>
+            </View>
           </View>
-        )}
-
-        <View className="p-5 bg-orange-50 m-5 rounded-xl mb-10">
-          <Text className="text-base font-bold mb-2 text-gray-800">
-            ℹ️ How it works:
-          </Text>
-          <Text className="text-sm text-gray-600 mb-1">
-            • Enter the Bus ID you want to track
-          </Text>
-          <Text className="text-sm text-gray-600 mb-1">
-            • Real-time location updates from Firebase
-          </Text>
-          <Text className="text-sm text-gray-600 mb-1">
-            • See all active drivers and their locations
-          </Text>
-          <Text className="text-sm text-gray-600 mb-1">
-            • Location updates every 5 seconds
-          </Text>
-          <Text className="text-sm text-gray-600 mb-1">
-            • Map shows bus location in real-time
-          </Text>
-          <Text className="text-sm text-gray-600 mb-1">
-            • Red pin = tracked bus, Blue pins = other buses
-          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

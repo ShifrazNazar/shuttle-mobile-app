@@ -70,9 +70,10 @@ export const subscribeToBusLocation = (
   onValue(locationRef, (snapshot) => {
     const data = snapshot.val();
     if (data) {
-      // Find the specific bus
+      // Find the specific bus and ensure it's active
       const busData = Object.values(data).find(
-        (location: any) => location.busId === busId
+        (location: any) =>
+          location.busId === busId && location.isActive === true
       ) as LocationData | undefined;
       callback(busData || null);
     } else {
@@ -98,7 +99,7 @@ export const getActiveBuses = (
       // Filter only active drivers and convert to busId-based structure
       const activeBuses: Record<string, LocationData> = {};
       Object.entries(data).forEach(([driverId, location]: [string, any]) => {
-        if (location.isActive) {
+        if (location.isActive === true) {
           activeBuses[location.busId] = location as LocationData;
         }
       });
