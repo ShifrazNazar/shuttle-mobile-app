@@ -93,7 +93,7 @@ export const startLocationTracking = async (
 
         // Schedule next update
         if (isActive) {
-          setTimeout(updateLocation, 5000);
+          global.setTimeout(updateLocation, 5000);
         }
       };
 
