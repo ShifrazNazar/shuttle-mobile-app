@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Alert, View } from "react-native";
 import { LocationObject } from "expo-location";
 import {
-  startLocationTracking,
   getCurrentLocation,
+  startLocationTracking,
 } from "../../services/location";
 import {
-  updateDriverLocation,
   stopDriverLocation,
+  updateDriverLocation,
 } from "../../services/firebase-realtime";
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
+  collection,
   doc,
   getDoc,
-  collection,
+  onSnapshot,
   query,
   where,
-  onSnapshot,
 } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
 

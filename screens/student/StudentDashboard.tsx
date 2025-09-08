@@ -1,18 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
   Alert,
-  ScrollView,
   Dimensions,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView from "react-native-maps";
 import {
+  getActiveBuses,
   LocationData,
   subscribeToBusLocation,
-  getActiveBuses,
 } from "../../services/firebase-realtime";
 import { getCurrentLocation } from "../../services/location";
 import { LocationObject } from "expo-location";
@@ -20,12 +18,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  doc,
-  getDoc,
   collection,
+  onSnapshot,
   query,
   where,
-  onSnapshot,
 } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
 
@@ -38,7 +34,7 @@ import RouteFilter from "../../components/student/RouteFilter";
 import StudentMapView from "../../components/student/MapView";
 
 // Import constants and types
-import { RouteData, fetchRoutesData } from "../../utils/constants";
+import { fetchRoutesData, RouteData } from "../../utils/constants";
 
 const { width } = Dimensions.get("window");
 

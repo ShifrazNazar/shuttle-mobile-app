@@ -1,7 +1,7 @@
 // Firebase configuration and setup
 
-import { initializeApp, FirebaseApp } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
+import { FirebaseApp, initializeApp } from "firebase/app";
+import { Auth, getAuth } from "firebase/auth";
 import Constants from "expo-constants";
 
 // Firebase configuration interface

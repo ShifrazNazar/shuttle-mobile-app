@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, SafeAreaView } from "react-native";
+import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 
 export default function Index() {

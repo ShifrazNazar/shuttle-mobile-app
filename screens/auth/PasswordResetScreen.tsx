@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  ActivityIndicator,
+  View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";

@@ -1,11 +1,11 @@
 import {
-  getDatabase,
-  ref,
-  set,
-  onValue,
-  off,
   Database,
+  getDatabase,
+  off,
+  onValue,
+  ref,
   remove,
+  set,
 } from "firebase/database";
 import { app } from "../firebase";
 
@@ -99,7 +99,7 @@ export const getActiveBuses = (
     const data = snapshot.val();
     if (data) {
       const activeBuses: Record<string, LocationData> = {};
-      Object.entries(data).forEach(([driverId, location]: [string, any]) => {
+      Object.entries(data).forEach(([_driverId, location]: [string, any]) => {
         if (location.isActive === true) {
           activeBuses[(location as any).busId] = location as LocationData;
         }

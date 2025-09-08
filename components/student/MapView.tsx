@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 interface LocationData {

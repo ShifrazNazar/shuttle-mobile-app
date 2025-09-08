@@ -1,19 +1,19 @@
 import React, {
   createContext,
+  ReactNode,
   useContext,
   useEffect,
-  useState,
-  ReactNode,
   useMemo,
+  useState,
 } from "react";
 import {
+  AuthError,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
-  sendPasswordResetEmail,
   updatePassword as updateFirebasePassword,
   User,
-  AuthError,
 } from "firebase/auth";
 import { auth, firestore } from "../services/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
