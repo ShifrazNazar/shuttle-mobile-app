@@ -22,6 +22,13 @@ import {
 } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
 
+// Import components
+import DashboardHeader from "../../components/common/DashboardHeader";
+import StatusCard from "../../components/common/StatusCard";
+import TrackingButton from "../../components/driver/TrackingButton";
+import BusAssignmentCard from "../../components/driver/BusAssignmentCard";
+import RouteAssignmentCard from "../../components/driver/RouteAssignmentCard";
+
 interface RouteAssignment {
   id: string;
   routeId: string;
@@ -188,156 +195,56 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 theme-bg">
+    <SafeAreaView className="flex-1 bg-[#f7f8fb]">
       {/* Header */}
-      <View className="bg-white border-b border-[#e5e7eb] px-6 pt-12 pb-6">
-        <View className="flex-row justify-between items-center">
-          <View className="flex-1">
-            <Text className="text-2xl font-bold theme-text-primary mb-2">
-              🚗 Driver Dashboard
-            </Text>
-            <Text className="theme-text-secondary text-base">
-              Share your location with students
-            </Text>
-          </View>
-          <TouchableOpacity
-            className="bg-[#ef4444] px-4 py-2 rounded-[12px]"
-            onPress={handleSignOut}
-          >
-            <Text className="text-white font-semibold text-sm">Sign Out</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <DashboardHeader
+        title="Driver Dashboard"
+        subtitle="Share your location with students"
+        icon="🚗"
+        onSignOut={handleSignOut}
+      />
 
       <View className="flex-1 p-6">
         {/* Main Tracking Button */}
         <View className="mb-6">
-          {!isTracking ? (
-            <TouchableOpacity
-              className={`p-8 rounded-[16px] items-center shadow-lg ${
-                busId
-                  ? "bg-[#2563eb] shadow-blue-200"
-                  : "bg-[#94a3b8] shadow-gray-200"
-              }`}
-              onPress={startTracking}
-              disabled={!busId}
-            >
-              <Text className="text-white text-3xl font-bold mb-3">
-                ▶️ Start Sharing
-              </Text>
-              <Text className="text-white text-lg opacity-90 text-center">
-                {busId
-                  ? "Students can now track your bus in real-time"
-                  : "You need to be assigned to a bus first"}
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              className="bg-[#ef4444] p-8 rounded-[16px] items-center shadow-lg shadow-red-200"
-              onPress={stopLocationTracking}
-            >
-              <Text className="text-white text-3xl font-bold mb-3">
-                ⏹️ Stop Sharing
-              </Text>
-              <Text className="text-white text-lg opacity-90 text-center">
-                Location sharing is currently active
-              </Text>
-            </TouchableOpacity>
-          )}
+          <TrackingButton
+            isTracking={isTracking}
+            busId={busId}
+            onStartTracking={startTracking}
+            onStopTracking={stopLocationTracking}
+          />
         </View>
 
         {/* Assigned Bus Info */}
-        <View className="theme-card p-4 mb-6 shadow-sm border border-[#e5e7eb]">
-          <Text className="text-lg font-bold mb-4 theme-text-primary">
-            🚌 Bus Assignment
-          </Text>
-          {busId ? (
-            <View className="bg-[#22c55e] p-3 rounded-[8px]">
-              <Text className="text-white text-center font-bold text-lg">
-                Assigned to Bus: {busId}
-              </Text>
-              <Text className="text-white text-center text-sm opacity-90 mt-1">
-                You can now start sharing your location
-              </Text>
-            </View>
-          ) : (
-            <View className="bg-[#f59e0b] p-3 rounded-[8px]">
-              <Text className="text-white text-center font-bold text-lg">
-                No Bus Assigned
-              </Text>
-              <Text className="text-white text-center text-sm opacity-90 mt-1">
-                Contact administrator to get assigned to a bus
-              </Text>
-            </View>
-          )}
-        </View>
+        <BusAssignmentCard busId={busId} />
 
         {/* Assigned Routes Info */}
-        <View className="theme-card p-4 mb-6 shadow-sm border border-[#e5e7eb]">
-          <Text className="text-lg font-bold mb-3 theme-text-primary">
-            🛣️ Your Routes
-          </Text>
-          {routesLoading ? (
-            <View className="bg-[#f3f4f6] p-4 rounded-[12px]">
-              <Text className="text-center text-[#6b7280]">Loading...</Text>
-            </View>
-          ) : assignedRoutes.length > 0 ? (
-            <View className="flex flex-col gap-2">
-              {assignedRoutes.map((route) => (
-                <View
-                  key={route.id}
-                  className="bg-[#eff6ff] p-3 rounded-[12px] border border-[#dbeafe] mb-2"
-                >
-                  <Text className="text-[#1e40af] font-semibold text-base">
-                    {route.routeName}
-                  </Text>
-                  <Text className="text-[#3b82f6] text-sm">
-                    {route.origin} → {route.destination}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <View className="bg-[#fef3c7] p-4 rounded-[12px] border border-[#f59e0b]">
-              <Text className="text-center text-[#92400e] font-medium">
-                No routes assigned yet
-              </Text>
-            </View>
-          )}
-        </View>
+        <RouteAssignmentCard
+          assignedRoutes={assignedRoutes}
+          routesLoading={routesLoading}
+        />
 
         {/* Status */}
-        <View className="theme-card p-4 mb-8 shadow-sm border border-[#e5e7eb]">
-          <Text className="text-lg font-bold mb-3 theme-text-primary">
-            📊 Status
-          </Text>
-          <View className="flex-col gap-3">
-            <View className="flex-row justify-between items-center">
-              <Text className="text-base theme-text-secondary">Location:</Text>
-              <View
-                className={`px-3 py-1 rounded-full ${
-                  isTracking ? "bg-[#22c55e]" : "bg-[#ef4444]"
-                }`}
-              >
-                <Text className="text-white text-sm font-medium">
-                  {isTracking ? "🟢 ACTIVE" : "🔴 INACTIVE"}
-                </Text>
-              </View>
-            </View>
-            <View className="flex-row justify-between items-center">
-              <Text className="text-base theme-text-secondary">Bus:</Text>
-              <Text className="text-base font-bold theme-text-primary">
-                {busId || "Not assigned"}
-              </Text>
-            </View>
-            <View className="flex-row justify-between items-center">
-              <Text className="text-base theme-text-secondary">Routes:</Text>
-              <Text className="text-base font-bold theme-text-primary">
-                {assignedRoutes.length}
-              </Text>
-            </View>
-          </View>
-        </View>
+        <StatusCard
+          title="Status"
+          icon="📊"
+          items={[
+            {
+              label: "Location",
+              value: isTracking ? "🟢 ACTIVE" : "🔴 INACTIVE",
+              type: "status",
+              statusColor: isTracking ? "green" : "red",
+            },
+            {
+              label: "Bus",
+              value: busId || "Not assigned",
+            },
+            {
+              label: "Routes",
+              value: assignedRoutes.length,
+            },
+          ]}
+        />
       </View>
     </SafeAreaView>
   );

@@ -6,6 +6,7 @@ import {
   TextInput,
   Alert,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import {
@@ -27,6 +28,16 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
+
+// Import components
+import DashboardHeader from "../../components/common/DashboardHeader";
+import TabNavigation from "../../components/common/TabNavigation";
+import StatusCard from "../../components/common/StatusCard";
+import RouteCard from "../../components/student/RouteCard";
+import RouteFilter from "../../components/student/RouteFilter";
+import StudentMapView from "../../components/student/MapView";
+
+const { width } = Dimensions.get("window");
 
 interface RouteData {
   routeId: string;
@@ -67,6 +78,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
   );
   const [selectedRoute, setSelectedRoute] = useState<string>("");
   const [routesLoading, setRoutesLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"routes" | "map" | "status">(
+    "routes"
+  );
   const stopAlertShownRef = useRef<string | null>(null);
   const isMountedRef = useRef(true);
   const mapRef = useRef<MapView | null>(null);
@@ -471,7 +485,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
   };
 
   // Get route status (operating today or not)
-  const getRouteStatus = (route: RouteData) => {
+  const getRouteStatus = (
+    route: RouteData
+  ): { status: "active" | "inactive" | "completed"; text: string } => {
     const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
     const isOperatingToday = route.operatingDays.includes(today);
 
@@ -642,343 +658,201 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     userLocation?.coords?.longitude,
   ]);
 
-  return (
-    <SafeAreaView className="flex-1 theme-bg">
-      <ScrollView className="flex-1">
-        {/* Header */}
-        <View className="bg-white border-b border-[#e5e7eb] px-6 pt-12 pb-6">
-          <View className="flex-row justify-between items-center">
-            <View className="flex-1">
-              <Text className="text-2xl font-bold theme-text-primary mb-2">
-                🎓 Student Dashboard
-              </Text>
-              <Text className="theme-text-secondary text-base">
-                Track your shuttle in real-time
-              </Text>
-            </View>
-            <TouchableOpacity
-              className="bg-[#ef4444] px-4 py-2 rounded-[12px]"
-              onPress={handleSignOut}
-            >
-              <Text className="text-white font-semibold text-sm">Sign Out</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+  // Tab configuration
+  const tabs = [
+    { id: "routes", icon: "🛣️", label: "Routes" },
+    { id: "map", icon: "🗺️", label: "Map" },
+    { id: "status", icon: "📊", label: "Status" },
+  ];
 
-        {/* Active Buses Section */}
+  // Routes Tab Content
+  const RoutesTab = () => (
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <View className="p-4">
+        <Text className="text-lg font-bold mb-3 text-gray-800">
+          🛣️ Available Routes
+        </Text>
+        <Text className="text-sm text-gray-600 mb-4">
+          Select a route to see active drivers and track buses
+        </Text>
 
-        {/* Routes Section */}
-        <View className="theme-card p-5 m-5">
-          <Text className="text-lg font-bold mb-3 theme-text-primary">
-            🛣️ Routes & Drivers
-          </Text>
-          <Text className="text-sm theme-text-secondary mb-4">
-            See which drivers are active on each route
-          </Text>
+        {/* Route Filter */}
+        <RouteFilter
+          routes={routes}
+          selectedRoute={selectedRoute}
+          onRouteSelect={setSelectedRoute}
+        />
 
-          {/* Route Filter */}
-          <View className="mb-4">
-            <Text className="text-sm font-medium mb-2 theme-text-primary">
-              Filter by Route:
-            </Text>
-            <View className="flex-row flex-wrap gap-2">
-              <TouchableOpacity
-                className={`px-3 py-2 rounded-[8px] border ${
-                  selectedRoute === ""
-                    ? "bg-[#2563eb] border-[#2563eb]"
-                    : "bg-white border-[#e5e7eb]"
-                }`}
-                onPress={() => setSelectedRoute("")}
-              >
-                <Text
-                  className={`text-sm font-medium ${
-                    selectedRoute === "" ? "text-white" : "text-gray-600"
-                  }`}
-                >
-                  All Routes
-                </Text>
-              </TouchableOpacity>
-              {routes.map((route) => (
-                <TouchableOpacity
-                  key={route.routeId}
-                  className={`px-3 py-2 rounded-[8px] border ${
-                    selectedRoute === route.routeId
-                      ? "bg-[#2563eb] border-[#2563eb]"
-                      : "bg-white border-[#e5e7eb]"
-                  }`}
-                  onPress={() => setSelectedRoute(route.routeId)}
-                >
-                  <Text
-                    className={`text-sm font-medium ${
-                      selectedRoute === route.routeId
-                        ? "text-white"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {route.origin} → {route.destination}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* Routes List */}
-          {routesLoading ? (
-            <View className="bg-[#f3f4f6] p-4 rounded-[8px]">
-              <Text className="text-center text-[#6b7280]">
-                Loading routes...
-              </Text>
-            </View>
-          ) : (
-            <View className="flex-col gap-3">
-              {routes
-                .filter(
-                  (route) => !selectedRoute || route.routeId === selectedRoute
-                )
-                .map((route) => {
-                  const routeStatus = getRouteStatus(route);
-                  const routeDrivers = getDriversByRouteId(route.routeId);
-                  const activeBuses = getActiveBusesByRoute(route.routeId);
-
-                  return (
-                    <View
-                      key={route.routeId}
-                      className="bg-white p-4 rounded-[8px] border border-[#e5e7eb]"
-                    >
-                      {/* Route Header */}
-                      <View className="flex-row justify-between items-start mb-2">
-                        <View className="flex-1">
-                          <Text className="font-bold text-base text-gray-800 mb-1">
-                            {route.routeName}
-                          </Text>
-                          <Text className="text-sm text-gray-600">
-                            {route.origin} → {route.destination}
-                          </Text>
-                        </View>
-                        <View
-                          className={`px-2 py-1 rounded-[4px] ${
-                            routeStatus.status === "active"
-                              ? "bg-[#22c55e]"
-                              : routeStatus.status === "completed"
-                                ? "bg-[#6b7280]"
-                                : "bg-[#f59e0b]"
-                          }`}
-                        >
-                          <Text className="text-white text-xs font-medium">
-                            {routeStatus.text}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* Route Details */}
-                      <View className="flex-row items-center gap-4 mb-3">
-                        <View className="flex-row items-center gap-1">
-                          <Text className="text-xs text-gray-500">📅</Text>
-                          <Text className="text-xs text-gray-600">
-                            {route.operatingDays.length === 7
-                              ? "Daily"
-                              : `${route.operatingDays.length} days/week`}
-                          </Text>
-                        </View>
-                        <View className="flex-row items-center gap-1">
-                          <Text className="text-xs text-gray-500">🚌</Text>
-                          <Text className="text-xs text-gray-600">
-                            {routeDrivers.length} driver
-                            {routeDrivers.length !== 1 ? "s" : ""}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* Active Drivers for This Route */}
-                      {activeBuses.length > 0 && (
-                        <View className="mt-3 pt-3 border-t border-gray-200">
-                          <Text className="text-sm font-medium text-gray-700 mb-2">
-                            🚗 Active Drivers Coming Your Way:
-                          </Text>
-                          <View className="flex-col gap-2">
-                            {activeBuses.map(([id, location]) => (
-                              <View
-                                key={id}
-                                className="bg-[#eff6ff] p-2 rounded-[6px] border border-[#dbeafe]"
-                              >
-                                <View className="flex-row justify-between items-center">
-                                  <View>
-                                    <Text className="font-medium text-[#1e40af] text-sm">
-                                      Bus {location.busId}
-                                    </Text>
-                                    <Text className="text-xs text-[#3b82f6]">
-                                      Driver:{" "}
-                                      {location.driverEmail ||
-                                        location.driverId}
-                                    </Text>
-                                  </View>
-                                  <TouchableOpacity
-                                    className="bg-[#2563eb] px-2 py-1 rounded-[4px]"
-                                    onPress={() =>
-                                      startTrackingBusWithId(location.busId)
-                                    }
-                                  >
-                                    <Text className="text-white text-xs font-medium">
-                                      Track
-                                    </Text>
-                                  </TouchableOpacity>
-                                </View>
-                                <Text className="text-xs text-[#6b7280] mt-1">
-                                  Last update:{" "}
-                                  {location.timestamp
-                                    ? new Date(
-                                        location.timestamp
-                                      ).toLocaleTimeString()
-                                    : "Unknown"}
-                                </Text>
-                              </View>
-                            ))}
-                          </View>
-                        </View>
-                      )}
-
-                      {/* No Active Drivers */}
-                      {routeDrivers.length > 0 && activeBuses.length === 0 && (
-                        <View className="mt-3 pt-3 border-t border-gray-200">
-                          <View className="bg-[#fef3c7] p-2 rounded-[6px] border border-[#f59e0b]">
-                            <Text className="text-xs text-[#92400e] text-center">
-                              ⚠️ Drivers assigned but not currently active
-                            </Text>
-                          </View>
-                        </View>
-                      )}
-
-                      {/* No Drivers Assigned */}
-                      {routeDrivers.length === 0 && (
-                        <View className="mt-3 pt-3 border-t border-gray-200">
-                          <View className="bg-[#f3f4f6] p-2 rounded-[6px] border border-[#d1d5db]">
-                            <Text className="text-xs text-[#6b7280] text-center">
-                              No drivers currently assigned to this route
-                            </Text>
-                          </View>
-                        </View>
-                      )}
-
-                      {/* Special Notes */}
-                      {route.specialNotes && (
-                        <View className="mt-3 pt-3 border-t border-gray-200">
-                          <View className="bg-[#fef3c7] p-2 rounded-[6px] border border-[#f59e0b]">
-                            <Text className="text-xs text-[#92400e]">
-                              ℹ️ {route.specialNotes}
-                            </Text>
-                          </View>
-                        </View>
-                      )}
-                    </View>
-                  );
-                })}
-            </View>
-          )}
-        </View>
-
-        {/* Map Section */}
-        <View className="m-5 rounded-xl overflow-hidden shadow-lg">
-          <View className="bg-white p-4 rounded-t-xl">
-            <Text className="text-lg font-bold text-gray-800">
-              🗺️ Live Tracking
-            </Text>
-            <Text className="text-sm text-gray-600">
-              {busLocation && busLocation.busId
-                ? `Tracking Bus ${busLocation.busId}`
-                : "Click on an active bus above to start tracking"}
+        {/* Routes List */}
+        {routesLoading ? (
+          <View className="bg-[#f3f4f6] p-4 rounded-[8px]">
+            <Text className="text-center text-[#6b7280]">
+              Loading routes...
             </Text>
           </View>
-          <View className="h-80">
-            <MapView
-              style={{ flex: 1 }}
-              key={`map-${isTracking ? busId || "idle" : "idle"}`}
-              ref={(ref) => (mapRef.current = ref)}
-              onMapReady={() => {
-                mapReadyRef.current = true;
-                const initial = getMapRegion();
-                try {
-                  mapRef.current?.animateToRegion(initial, 0);
-                } catch (e) {
-                  console.error("Error animating to region:", e);
-                }
-              }}
-              initialRegion={defaultRegion}
-              showsUserLocation={true}
-              showsMyLocationButton={true}
-            >
-              {/* Show tracked bus */}
-              {busLocation &&
-                typeof busLocation.latitude === "number" &&
-                typeof busLocation.longitude === "number" && (
-                  <Marker
-                    coordinate={{
-                      latitude: busLocation.latitude,
-                      longitude: busLocation.longitude,
-                    }}
-                    title={`Bus ${busLocation.busId}`}
-                    description={`Driver: ${busLocation.driverEmail || busLocation.driverId}`}
-                    pinColor="red"
-                  />
-                )}
+        ) : (
+          <View className="flex-col gap-3">
+            {routes
+              .filter(
+                (route) => !selectedRoute || route.routeId === selectedRoute
+              )
+              .map((route) => {
+                const routeStatus = getRouteStatus(route);
+                const routeDrivers = getDriversByRouteId(route.routeId);
+                const activeBuses = getActiveBusesByRoute(route.routeId);
 
-              {/* Show all active buses */}
-              {Object.entries(allBuses).map(([id, location]) => {
-                const latOk = typeof location.latitude === "number";
-                const lngOk = typeof location.longitude === "number";
-                if (!latOk || !lngOk) return null;
                 return (
-                  <Marker
-                    key={id}
-                    coordinate={{
-                      latitude: location.latitude,
-                      longitude: location.longitude,
+                  <RouteCard
+                    key={route.routeId}
+                    route={route}
+                    routeStatus={routeStatus}
+                    routeDrivers={routeDrivers}
+                    activeBuses={activeBuses}
+                    onTrackBus={startTrackingBusWithId}
+                    onViewMap={(busId) => {
+                      setActiveTab("map");
+                      startTrackingBusWithId(busId);
                     }}
-                    title={`Bus ${location.busId}`}
-                    description={`Driver: ${location.driverEmail || location.driverId}`}
-                    pinColor={id === busId ? "red" : "blue"}
                   />
                 );
               })}
-            </MapView>
+          </View>
+        )}
+      </View>
+    </ScrollView>
+  );
+
+  // Map Tab Content
+  const MapTab = () => (
+    <StudentMapView
+      busLocation={busLocation}
+      allBuses={allBuses}
+      isTracking={isTracking}
+      busId={busId}
+      onStopTracking={stopTrackingBus}
+      defaultRegion={defaultRegion}
+      getMapRegion={getMapRegion}
+    />
+  );
+
+  // Status Tab Content
+  const StatusTab = () => (
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <View className="p-4">
+        <Text className="text-lg font-bold mb-4 text-gray-800">
+          📊 System Status
+        </Text>
+
+        {/* Tracking Status Card */}
+        <StatusCard
+          title="Current Tracking"
+          icon="🎯"
+          items={[
+            {
+              label: "Status",
+              value: isTracking ? "🟢 ACTIVE" : "🔴 INACTIVE",
+              type: "status",
+              statusColor: isTracking ? "green" : "red",
+            },
+            {
+              label: "Tracking",
+              value: isTracking && busLocation ? `Bus ${busId}` : "None",
+            },
+          ]}
+        />
+
+        {/* System Overview Cards */}
+        <View className="flex-row gap-3 mb-4">
+          <View className="flex-1 bg-white p-4 rounded-[12px] border border-[#e5e7eb] shadow-sm">
+            <Text className="text-2xl font-bold text-[#2563eb] mb-1">
+              {Object.keys(allBuses).length}
+            </Text>
+            <Text className="text-sm text-gray-600">Active Drivers</Text>
+          </View>
+          <View className="flex-1 bg-white p-4 rounded-[12px] border border-[#e5e7eb] shadow-sm">
+            <Text className="text-2xl font-bold text-[#22c55e] mb-1">
+              {routes.length}
+            </Text>
+            <Text className="text-sm text-gray-600">Total Routes</Text>
           </View>
         </View>
 
-        <View className="p-5 bg-white m-5 rounded-xl shadow-sm">
-          <Text className="text-lg font-bold mb-4 text-gray-800">
-            📊 Status
+        {/* Quick Actions */}
+        <StatusCard
+          title="Quick Actions"
+          icon="⚡"
+          items={[]}
+          quickActions={[
+            {
+              label: "View Routes",
+              onPress: () => setActiveTab("routes"),
+              color: "blue",
+            },
+            {
+              label: "Open Map",
+              onPress: () => setActiveTab("map"),
+              color: "green",
+            },
+          ]}
+        />
+
+        {/* Recent Activity */}
+        <View className="bg-white p-4 rounded-[12px] border border-[#e5e7eb] shadow-sm">
+          <Text className="text-base font-semibold text-gray-800 mb-3">
+            📈 Recent Activity
           </Text>
-          <View className="flex-col gap-3">
-            <View className="flex-row justify-between items-center">
-              <Text className="text-base text-gray-600">Tracking:</Text>
-              <View
-                className={`px-3 py-1 rounded-full ${
-                  isTracking ? "bg-[#22c55e]" : "bg-[#ef4444]"
-                }`}
-              >
-                <Text className="text-white text-sm font-medium">
-                  {isTracking ? "🟢 ACTIVE" : "🔴 INACTIVE"}
-                </Text>
-              </View>
-            </View>
-            <View className="flex-row justify-between items-center">
-              <Text className="text-base text-gray-600">Tracking:</Text>
-              <Text className="text-base font-bold">
-                {isTracking && busLocation ? `Bus ${busId}` : "None"}
+          <View className="space-y-2">
+            <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
+              <Text className="text-sm text-gray-600">
+                Last location update:
+              </Text>
+              <Text className="text-sm font-medium">
+                {busLocation?.timestamp
+                  ? new Date(busLocation.timestamp).toLocaleTimeString()
+                  : "Never"}
               </Text>
             </View>
-            <View className="flex-row justify-between items-center">
-              <Text className="text-base text-gray-600">Active Drivers:</Text>
-              <Text className="text-base font-bold">
-                {Object.keys(allBuses).length}
+            <View className="flex-row justify-between items-center py-2 border-b border-gray-100">
+              <Text className="text-sm text-gray-600">Routes loaded:</Text>
+              <Text className="text-sm font-medium">
+                {routesLoading ? "Loading..." : `${routes.length} routes`}
               </Text>
             </View>
-            <View className="flex-row justify-between items-center">
-              <Text className="text-base text-gray-600">Routes:</Text>
-              <Text className="text-base font-bold">{routes.length}</Text>
+            <View className="flex-row justify-between items-center py-2">
+              <Text className="text-sm text-gray-600">System status:</Text>
+              <Text className="text-sm font-medium text-[#22c55e]">Online</Text>
             </View>
           </View>
         </View>
-      </ScrollView>
+      </View>
+    </ScrollView>
+  );
+
+  return (
+    <SafeAreaView className="flex-1 bg-[#f7f8fb]">
+      {/* Header */}
+      <DashboardHeader
+        title="Student Dashboard"
+        subtitle="Track your shuttle in real-time"
+        icon="🎓"
+        onSignOut={handleSignOut}
+      />
+
+      {/* Tab Navigation */}
+      <TabNavigation
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(tabId) =>
+          setActiveTab(tabId as "routes" | "map" | "status")
+        }
+      />
+
+      {/* Tab Content */}
+      <View className="flex-1">
+        {activeTab === "routes" && <RoutesTab />}
+        {activeTab === "map" && <MapTab />}
+        {activeTab === "status" && <StatusTab />}
+      </View>
     </SafeAreaView>
   );
 };

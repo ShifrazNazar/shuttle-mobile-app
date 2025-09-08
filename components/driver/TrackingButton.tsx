@@ -1,0 +1,55 @@
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+
+interface TrackingButtonProps {
+  isTracking: boolean;
+  busId: string;
+  onStartTracking: () => void;
+  onStopTracking: () => void;
+}
+
+const TrackingButton: React.FC<TrackingButtonProps> = ({
+  isTracking,
+  busId,
+  onStartTracking,
+  onStopTracking,
+}) => {
+  if (!isTracking) {
+    return (
+      <TouchableOpacity
+        className={`p-8 rounded-[16px] items-center shadow-lg ${
+          busId
+            ? "bg-[#2563eb] shadow-blue-200"
+            : "bg-[#94a3b8] shadow-gray-200"
+        }`}
+        onPress={onStartTracking}
+        disabled={!busId}
+      >
+        <Text className="text-white text-3xl font-bold mb-3">
+          ▶️ Start Sharing
+        </Text>
+        <Text className="text-white text-lg opacity-90 text-center">
+          {busId
+            ? "Students can now track your bus in real-time"
+            : "You need to be assigned to a bus first"}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <TouchableOpacity
+      className="bg-[#ef4444] p-8 rounded-[16px] items-center shadow-lg shadow-red-200"
+      onPress={onStopTracking}
+    >
+      <Text className="text-white text-3xl font-bold mb-3">
+        ⏹️ Stop Sharing
+      </Text>
+      <Text className="text-white text-lg opacity-90 text-center">
+        Location sharing is currently active
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+export default TrackingButton;
