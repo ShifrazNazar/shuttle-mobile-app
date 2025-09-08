@@ -1,15 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-
-interface RouteData {
-  routeId: string;
-  routeName: string;
-  origin: string;
-  destination: string;
-  operatingDays: string[];
-  schedule: string[];
-  specialNotes?: string;
-}
+import { RouteData } from "../../utils/constants";
 
 interface RouteAssignment {
   id: string;
