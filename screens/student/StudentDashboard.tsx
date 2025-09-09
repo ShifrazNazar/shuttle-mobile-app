@@ -1,11 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  Dimensions,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { Alert, Dimensions, ScrollView, Text, View } from "react-native";
 import MapView from "react-native-maps";
 import {
   getActiveBuses,
@@ -17,12 +11,7 @@ import { LocationObject } from "expo-location";
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  collection,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
 
 // Import components
@@ -244,7 +233,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
         if (stopAlertShownRef.current !== currentBusId && currentBusId) {
           stopAlertShownRef.current = currentBusId;
           try {
-            setTimeout(() => {
+            global.setTimeout(() => {
               if (!isMountedRef.current) return;
               Alert.alert(
                 "Driver Stopped Sharing",

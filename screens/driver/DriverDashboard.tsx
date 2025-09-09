@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { LocationObject } from "expo-location";
 import {
   getCurrentLocation,
@@ -21,6 +21,7 @@ import {
   where,
 } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
+import { DEMO_CONFIGS, demoService } from "../../services/demo";
 
 // Import components
 import DashboardHeader from "../../components/common/DashboardHeader";
@@ -46,6 +47,7 @@ interface DriverDashboardProps {
 const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
   const { signOut, user } = useAuth();
   const [isTracking, setIsTracking] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<LocationObject | null>(
     null
   );
@@ -183,6 +185,12 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
       setStopTracking(null);
     }
 
+    // Stop demo if running
+    if (isDemoMode) {
+      await demoService.stopDemo(driverId, busId);
+      setIsDemoMode(false);
+    }
+
     // Remove driver from active drivers in Firebase
     try {
       await stopDriverLocation(driverId);
@@ -192,6 +200,52 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
 
     setIsTracking(false);
     Alert.alert("Success", "Location sharing stopped!");
+  };
+
+  const startDemo = async () => {
+    if (!busId) {
+      Alert.alert("Error", "Please assign a bus ID first");
+      return;
+    }
+
+    try {
+      // Use the first assigned route for demo, or default to R001
+      const demoRouteId =
+        assignedRoutes.length > 0 ? assignedRoutes[0].routeId : "R001";
+      const demoConfig =
+        DEMO_CONFIGS[demoRouteId as keyof typeof DEMO_CONFIGS] ||
+        DEMO_CONFIGS.R001;
+
+      const config = {
+        ...demoConfig,
+        busId,
+        driverId,
+        driverEmail: user?.email || undefined,
+      };
+
+      await demoService.startDemo(config);
+      setIsDemoMode(true);
+      setIsTracking(true);
+      Alert.alert(
+        "Demo Started",
+        `Simulating ${demoRouteId} route with bus ${busId}`
+      );
+    } catch (error) {
+      Alert.alert("Error", "Failed to start demo");
+      console.error(error);
+    }
+  };
+
+  const stopDemo = async () => {
+    try {
+      await demoService.stopDemo(driverId, busId);
+      setIsDemoMode(false);
+      setIsTracking(false);
+      Alert.alert("Demo Stopped", "Demo simulation ended");
+    } catch (error) {
+      Alert.alert("Error", "Failed to stop demo");
+      console.error(error);
+    }
   };
 
   return (
@@ -205,6 +259,44 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
       />
 
       <View className="flex-1 p-6">
+        {/* Demo Mode Toggle */}
+        {!isTracking && (
+          <View className="mb-4">
+            <TouchableOpacity
+              className={`p-4 rounded-[12px] border-2 ${
+                isDemoMode
+                  ? "bg-[#8b5cf6] border-[#8b5cf6]"
+                  : "bg-white border-[#e5e7eb]"
+              }`}
+              onPress={() => {
+                if (isDemoMode) {
+                  stopDemo();
+                } else {
+                  startDemo();
+                }
+              }}
+              disabled={!busId}
+            >
+              <Text
+                className={`text-center font-semibold ${
+                  isDemoMode ? "text-white" : "text-gray-700"
+                }`}
+              >
+                {isDemoMode ? "🎭 Demo Mode Active" : "🎭 Start Demo Mode"}
+              </Text>
+              <Text
+                className={`text-center text-sm mt-1 ${
+                  isDemoMode ? "text-purple-100" : "text-gray-500"
+                }`}
+              >
+                {isDemoMode
+                  ? "Simulating bus movement along route"
+                  : "Simulate bus movement for demonstration"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Main Tracking Button */}
         <View className="mb-6">
           <TrackingButton
@@ -212,6 +304,9 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
             busId={busId}
             onStartTracking={startTracking}
             onStopTracking={stopLocationTracking}
+            isDemoMode={isDemoMode}
+            onStartDemo={startDemo}
+            onStopDemo={stopDemo}
           />
         </View>
 
@@ -229,6 +324,12 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
           title="Status"
           icon="📊"
           items={[
+            {
+              label: "Mode",
+              value: isDemoMode ? "🎭 DEMO" : "📍 REAL",
+              type: "status",
+              statusColor: isDemoMode ? "blue" : "green",
+            },
             {
               label: "Location",
               value: isTracking ? "🟢 ACTIVE" : "🔴 INACTIVE",
