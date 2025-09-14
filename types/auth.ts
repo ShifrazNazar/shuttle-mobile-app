@@ -9,12 +9,15 @@ export interface AuthResult {
 }
 
 export interface AuthContextType {
-  user: any | null;
+  user: User | null;
+  role: string | null;
   loading: boolean;
+  isFirstTimeLogin: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<AuthResult>;
   resetPassword: (email: string) => Promise<AuthResult>;
+  updatePassword: (newPassword: string) => Promise<AuthResult>;
 }
 
 export interface AuthProviderProps {

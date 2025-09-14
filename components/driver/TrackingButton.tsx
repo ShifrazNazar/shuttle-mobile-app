@@ -2,8 +2,6 @@ import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 import { TrackingButtonProps } from "../../types";
 
-
-
 const TrackingButton: React.FC<TrackingButtonProps> = ({
   isTracking,
   busId,

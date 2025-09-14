@@ -106,8 +106,12 @@ export interface LoadingScreenProps {
 // Tracking Button Props
 export interface TrackingButtonProps {
   isTracking: boolean;
-  onStart: () => void;
-  onStop: () => void;
+  busId: string;
+  onStartTracking: () => void;
+  onStopTracking: () => void;
+  isDemoMode?: boolean;
+  onStartDemo?: () => void;
+  onStopDemo?: () => void;
   disabled?: boolean;
 }
 
@@ -130,4 +134,12 @@ export interface DemoBus {
   id: string;
   routeId: string;
   location: LocationData;
+  driverId: string;
+  busId: string;
+  state: {
+    isRunning: boolean;
+    currentWaypointIndex: number;
+    progress: number;
+    startTime: number;
+  };
 }

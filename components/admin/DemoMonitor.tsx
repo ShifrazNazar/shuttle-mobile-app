@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { demoService } from "../../services/demo";
-import { DemoBus } from "../../types";
-
-
+import { DemoBus, LocationData } from "../../types";
 
 const DemoMonitor: React.FC = () => {
   const [demoBuses, setDemoBuses] = useState<DemoBus[]>([]);
@@ -12,7 +10,21 @@ const DemoMonitor: React.FC = () => {
   useEffect(() => {
     const interval = global.setInterval(() => {
       const activeDemos = demoService.getAllActiveDemos();
-      setDemoBuses(activeDemos);
+      const transformedDemos: DemoBus[] = activeDemos.map((demo) => ({
+        id: demo.busId,
+        routeId: demo.driverId, // Using driverId as routeId for demo purposes
+        location: {
+          busId: demo.busId,
+          driverId: demo.driverId,
+          latitude: 0, // Demo location not needed for monitor
+          longitude: 0,
+          timestamp: Date.now(),
+        },
+        driverId: demo.driverId,
+        busId: demo.busId,
+        state: demo.state,
+      }));
+      setDemoBuses(transformedDemos);
     }, 1000); // Update every second
 
     return () => global.clearInterval(interval);

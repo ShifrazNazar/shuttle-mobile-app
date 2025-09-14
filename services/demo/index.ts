@@ -179,7 +179,7 @@ class DemoService {
       state: DemoState;
     }> = [];
 
-    for (const [demoKey, state] of this.demos.entries()) {
+    for (const [demoKey, state] of Array.from(this.demos.entries())) {
       if (state.isRunning) {
         const [driverId, busId] = demoKey.split("-");
         activeDemos.push({ driverId, busId, state });

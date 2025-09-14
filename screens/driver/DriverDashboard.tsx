@@ -12,14 +12,7 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
 import { DEMO_CONFIGS, demoService } from "../../services/demo";
 
@@ -29,10 +22,15 @@ import StatusCard from "../../components/common/StatusCard";
 import TrackingButton from "../../components/driver/TrackingButton";
 import BusAssignmentCard from "../../components/driver/BusAssignmentCard";
 import RouteAssignmentCard from "../../components/driver/RouteAssignmentCard";
-import { RouteAssignment, DriverDashboardProps } from "../../types";
 
-const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
+// Import hooks and types
+import { useDriverRouteAssignments } from "../../hooks/useDriverRouteAssignments";
+import { DriverDashboardProps } from "../../types";
+
+const DriverDashboard: React.FC<DriverDashboardProps> = () => {
   const { signOut, user } = useAuth();
+  const { assignments: assignedRoutes, loading: routesLoading } =
+    useDriverRouteAssignments(user?.uid || "");
   const [isTracking, setIsTracking] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<LocationObject | null>(
@@ -41,8 +39,6 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
   const [driverId, setDriverId] = useState(user?.uid || "");
   const [busId, setBusId] = useState("");
   const [stopTracking, setStopTracking] = useState<(() => void) | null>(null);
-  const [assignedRoutes, setAssignedRoutes] = useState<RouteAssignment[]>([]);
-  const [routesLoading, setRoutesLoading] = useState(true);
 
   // Update driverId when user changes
   useEffect(() => {
@@ -68,44 +64,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
     }
   };
 
-  // Fetch assigned routes from Firestore
-  const fetchAssignedRoutes = () => {
-    if (!user?.uid) return;
-
-    try {
-      const routesRef = collection(firestore, "routeAssignments");
-      const routesQuery = query(
-        routesRef,
-        where("driverId", "==", user.uid),
-        where("status", "==", "active")
-      );
-
-      const unsubscribe = onSnapshot(
-        routesQuery,
-        (snapshot) => {
-          const routes: RouteAssignment[] = [];
-          snapshot.forEach((doc) => {
-            routes.push({
-              id: doc.id,
-              ...doc.data(),
-            } as RouteAssignment);
-          });
-
-          setAssignedRoutes(routes);
-          setRoutesLoading(false);
-        },
-        (error) => {
-          console.error("Error listening to route assignments:", error);
-          setRoutesLoading(false);
-        }
-      );
-
-      return unsubscribe;
-    } catch (error) {
-      console.error("Error fetching assigned routes:", error);
-      setRoutesLoading(false);
-    }
-  };
+  // Route assignments are now managed by useDriverRouteAssignments hook
 
   const handleSignOut = async () => {
     // Stop location tracking before signing out
@@ -128,15 +87,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
     // Fetch assigned bus
     fetchAssignedBus();
 
-    // Fetch assigned routes
-    const unsubscribeRoutes = fetchAssignedRoutes();
-
-    // Cleanup function
-    return () => {
-      if (unsubscribeRoutes) {
-        unsubscribeRoutes();
-      }
-    };
+    // Route assignments are automatically managed by useDriverRouteAssignments hook
   }, [user]);
 
   const startTracking = async () => {
@@ -207,7 +158,15 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
         ...demoConfig,
         busId,
         driverId,
-        driverEmail: user?.email || undefined,
+        driverEmail: user?.email || "",
+        routeName:
+          assignedRoutes.length > 0
+            ? assignedRoutes[0].routeName
+            : "Demo Route",
+        waypoints: demoConfig.waypoints.map((wp) => ({
+          latitude: wp.lat,
+          longitude: wp.lng,
+        })),
       };
 
       await demoService.startDemo(config);
@@ -298,13 +257,25 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
         </View>
 
         {/* Assigned Bus Info */}
-        <BusAssignmentCard busId={busId} />
+        <BusAssignmentCard
+          busId={busId}
+          routeName={
+            assignedRoutes.length > 0
+              ? assignedRoutes[0].routeName
+              : "No route assigned"
+          }
+          isActive={isTracking}
+          onPress={() => {}}
+        />
 
         {/* Assigned Routes Info */}
-        <RouteAssignmentCard
-          assignedRoutes={assignedRoutes}
-          routesLoading={routesLoading}
-        />
+        {assignedRoutes.map((assignment) => (
+          <RouteAssignmentCard
+            key={assignment.id}
+            assignment={assignment}
+            onPress={() => {}}
+          />
+        ))}
 
         {/* Status */}
         <StatusCard
@@ -329,7 +300,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
             },
             {
               label: "Routes",
-              value: assignedRoutes.length,
+              value: assignedRoutes.length.toString(),
             },
           ]}
         />

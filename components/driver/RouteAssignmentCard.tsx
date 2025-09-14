@@ -1,56 +1,33 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { Text, View, TouchableOpacity } from "react-native";
 import { RouteAssignmentCardProps } from "../../types";
 
-interface RouteAssignment {
-  id: string;
-  routeId: string;
-  routeName: string;
-  origin: string;
-  destination: string;
-  status: "active" | "inactive" | "temporary";
-  assignedAt: any;
-}
-
-
-
 const RouteAssignmentCard: React.FC<RouteAssignmentCardProps> = ({
-  assignedRoutes,
-  routesLoading,
+  assignment,
+  onPress,
 }) => {
   return (
-    <View className="bg-white p-4 rounded-[12px] border border-[#e5e7eb] shadow-sm mb-6">
-      <Text className="text-lg font-bold mb-3 text-gray-800">
-        🛣️ Your Routes
-      </Text>
-      {routesLoading ? (
-        <View className="bg-[#f3f4f6] p-4 rounded-[12px]">
-          <Text className="text-center text-[#6b7280]">Loading...</Text>
-        </View>
-      ) : assignedRoutes.length > 0 ? (
-        <View className="flex flex-col gap-2">
-          {assignedRoutes.map((route) => (
-            <View
-              key={route.id}
-              className="bg-[#eff6ff] p-3 rounded-[12px] border border-[#dbeafe] mb-2"
-            >
-              <Text className="text-[#1e40af] font-semibold text-base">
-                {route.routeName}
-              </Text>
-              <Text className="text-[#3b82f6] text-sm">
-                {route.origin} → {route.destination}
-              </Text>
-            </View>
-          ))}
-        </View>
-      ) : (
-        <View className="bg-[#fef3c7] p-4 rounded-[12px] border border-[#f59e0b]">
-          <Text className="text-center text-[#92400e] font-medium">
-            No routes assigned yet
+    <TouchableOpacity
+      className="bg-white p-4 rounded-[12px] border border-[#e5e7eb] shadow-sm mb-4"
+      onPress={onPress}
+    >
+      <View className="flex-row justify-between items-center">
+        <View className="flex-1">
+          <Text className="text-[#1e40af] font-semibold text-base mb-1">
+            {assignment.routeName}
+          </Text>
+          <Text className="text-[#3b82f6] text-sm">
+            Route ID: {assignment.routeId}
+          </Text>
+          <Text className="text-gray-500 text-xs mt-1">
+            Status: {assignment.status}
           </Text>
         </View>
-      )}
-    </View>
+        <View className="ml-3">
+          <Text className="text-2xl">🚌</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 

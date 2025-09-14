@@ -1,5 +1,6 @@
 import {
   Database,
+  DataSnapshot,
   getDatabase,
   off,
   onValue,
@@ -68,11 +69,11 @@ export const subscribeToBusLocation = (
   const locationRef = ref(database, `activeDrivers`);
 
   // Keep a stable handler reference so we can detach only this listener
-  const handleValue = (snapshot: any) => {
+  const handleValue = (snapshot: DataSnapshot) => {
     const data = snapshot.val();
     if (data) {
-      const busData = (Object.values(data) as any[]).find(
-        (location: any) =>
+      const busData = (Object.values(data) as LocationData[]).find(
+        (location: LocationData) =>
           location.busId === busId && location.isActive === true
       ) as LocationData | undefined;
       callback(busData || null);
@@ -95,13 +96,14 @@ export const getActiveBuses = (
 ) => {
   const locationsRef = ref(database, "activeDrivers");
 
-  const handleValue = (snapshot: any) => {
+  const handleValue = (snapshot: DataSnapshot) => {
     const data = snapshot.val();
     if (data) {
       const activeBuses: Record<string, LocationData> = {};
-      Object.entries(data).forEach(([_driverId, location]: [string, any]) => {
-        if (location.isActive === true) {
-          activeBuses[(location as any).busId] = location as LocationData;
+      Object.entries(data).forEach(([_driverId, location]) => {
+        const locationData = location as LocationData;
+        if (locationData.isActive === true) {
+          activeBuses[locationData.busId] = locationData;
         }
       });
       callback(activeBuses);
@@ -123,13 +125,14 @@ export const getAllActiveDrivers = (
 ) => {
   const driversRef = ref(database, "activeDrivers");
 
-  const handleValue = (snapshot: any) => {
+  const handleValue = (snapshot: DataSnapshot) => {
     const data = snapshot.val();
     if (data) {
       const activeDrivers: Record<string, LocationData> = {};
-      Object.entries(data).forEach(([driverId, location]: [string, any]) => {
-        if ((location as any).isActive) {
-          activeDrivers[driverId] = location as LocationData;
+      Object.entries(data).forEach(([driverId, location]) => {
+        const locationData = location as LocationData;
+        if (locationData.isActive) {
+          activeDrivers[driverId] = locationData;
         }
       });
       callback(activeDrivers);

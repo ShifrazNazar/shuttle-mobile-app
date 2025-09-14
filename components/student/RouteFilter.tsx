@@ -1,9 +1,6 @@
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { RouteData } from "../../utils/constants";
 import { RouteFilterProps } from "../../types";
-
-
 
 const RouteFilter: React.FC<RouteFilterProps> = ({
   routes,

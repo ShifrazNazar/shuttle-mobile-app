@@ -1,6 +1,5 @@
 import React, {
   createContext,
-  ReactNode,
   useContext,
   useEffect,
   useMemo,
@@ -8,6 +7,7 @@ import React, {
 } from "react";
 import {
   AuthError,
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -17,13 +17,7 @@ import {
 } from "firebase/auth";
 import { auth, firestore } from "../services/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { AuthResult, AuthContextType, AuthProviderProps } from "../../types";
-
-// Auth result interface
-
-
-// Auth context interface
-
+import { AuthResult, AuthContextType, AuthProviderProps } from "../types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -34,8 +28,6 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-
-
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -129,6 +121,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Sign up with email and password
+  const signUp = async (
+    email: string,
+    password: string
+  ): Promise<AuthResult> => {
+    try {
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      return { success: true, user: result.user };
+    } catch (error) {
+      const authError = error as AuthError;
+      return { success: false, error: authError.message };
+    }
+  };
+
   // Reset password
   const resetPassword = async (email: string): Promise<AuthResult> => {
     try {
@@ -171,6 +181,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       loading,
       isFirstTimeLogin,
       signIn,
+      signUp,
       signOut: signOutUser,
       resetPassword,
       updatePassword,

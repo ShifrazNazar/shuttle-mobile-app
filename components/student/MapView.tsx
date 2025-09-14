@@ -3,17 +3,6 @@ import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { MapViewProps } from "../../types";
 
-interface LocationData {
-  busId: string;
-  driverId: string;
-  driverEmail?: string;
-  latitude: number;
-  longitude: number;
-  timestamp: number;
-}
-
-
-
 const StudentMapView: React.FC<MapViewProps> = ({
   busLocation,
   allBuses,

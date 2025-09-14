@@ -6,7 +6,6 @@ import Constants from "expo-constants";
 
 // Firebase configuration interface
 
-
 // Firebase configuration using environment variables
 const firebaseConfig: FirebaseConfig = {
   apiKey: Constants.expoConfig?.extra?.firebaseApiKey || "",

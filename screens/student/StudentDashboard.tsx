@@ -11,9 +11,6 @@ import { LocationObject } from "expo-location";
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { firestore } from "../../services/firebase";
-
 // Import components
 import DashboardHeader from "../../components/common/DashboardHeader";
 import TabNavigation from "../../components/common/TabNavigation";
@@ -22,21 +19,21 @@ import RouteCard from "../../components/student/RouteCard";
 import RouteFilter from "../../components/student/RouteFilter";
 import StudentMapView from "../../components/student/MapView";
 
-// Import constants and types
+// Import hooks and types
 import { useRoutes } from "../../hooks/useRoutes";
+import { useRouteAssignments } from "../../hooks/useRouteAssignments";
 import { RouteData, RouteAssignment, StudentDashboardProps } from "../../types";
 
 const StudentDashboard: React.FC<StudentDashboardProps> = () => {
   const { signOut, user } = useAuth();
   const { routes, loading: routesLoading, error: routesError } = useRoutes();
+  const { assignments: routeAssignments, loading: assignmentsLoading } =
+    useRouteAssignments();
   const [busId, setBusId] = useState("");
   const [busLocation, setBusLocation] = useState<LocationData | null>(null);
   const [userLocation, setUserLocation] = useState<LocationObject | null>(null);
   const [allBuses, setAllBuses] = useState<Record<string, LocationData>>({});
   const [isTracking, setIsTracking] = useState(false);
-  const [routeAssignments, setRouteAssignments] = useState<RouteAssignment[]>(
-    []
-  );
   const [selectedRoute, setSelectedRoute] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"routes" | "map" | "status">(
     "routes"
@@ -55,41 +52,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
     }
   };
 
-  // Routes are now managed by the useRoutes hook
-
-  // Setup route assignments listener
-  const setupRouteAssignmentsListener = () => {
-    try {
-      const assignmentsRef = collection(firestore, "routeAssignments");
-      const assignmentsQuery = query(
-        assignmentsRef,
-        where("status", "==", "active")
-      );
-
-      const unsubscribe = onSnapshot(
-        assignmentsQuery,
-        (snapshot) => {
-          const assignments: RouteAssignment[] = [];
-          snapshot.forEach((doc) => {
-            assignments.push({
-              id: doc.id,
-              ...doc.data(),
-            } as RouteAssignment);
-          });
-
-          setRouteAssignments(assignments);
-        },
-        (error) => {
-          console.error("Error listening to route assignments:", error);
-        }
-      );
-
-      return unsubscribe;
-    } catch (error) {
-      console.error("Error setting up route assignments listener:", error);
-      return null;
-    }
-  };
+  // Routes and route assignments are now managed by hooks
 
   // Get drivers assigned to a specific route
   const getDriversByRouteId = (routeId: string) => {
@@ -140,10 +103,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
       setAllBuses(buses);
     });
 
-    // Routes are automatically loaded by useRoutes hook
-
-    // Setup route assignments listener
-    const unsubscribeRoutes = setupRouteAssignmentsListener();
+    // Routes and route assignments are automatically loaded by hooks
 
     return () => {
       isMountedRef.current = false;
@@ -153,9 +113,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
       setBusId("");
 
       unsubscribeAllBuses();
-      if (unsubscribeRoutes) {
-        unsubscribeRoutes();
-      }
     };
   }, []);
 
