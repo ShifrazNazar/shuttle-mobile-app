@@ -44,15 +44,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (userDoc.exists()) {
             const userData = userDoc.data() as {
               role?: string;
-              defaultPassword?: string;
-              passwordChanged?: boolean;
+              requiresPasswordChange?: boolean;
             };
             setUser(user);
             setRole(userData.role || null);
-            // Check if this is first time login (has default password and hasn't changed it)
-            setIsFirstTimeLogin(
-              !!userData.defaultPassword && !userData.passwordChanged
-            );
+            // Check if this is first time login (requires password change)
+            setIsFirstTimeLogin(!!userData.requiresPasswordChange);
           } else {
             setUser(user);
             setRole(null);
@@ -85,14 +82,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (userDoc.exists()) {
           const userData = userDoc.data() as {
             role?: string;
-            defaultPassword?: string;
-            passwordChanged?: boolean;
+            requiresPasswordChange?: boolean;
           };
           setRole(userData.role || null);
           // Check if this is first time login
-          setIsFirstTimeLogin(
-            !!userData.defaultPassword && !userData.passwordChanged
-          );
+          setIsFirstTimeLogin(!!userData.requiresPasswordChange);
         } else {
           setRole(null);
           setIsFirstTimeLogin(false);
@@ -162,7 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Update Firestore to mark password as changed
       await updateDoc(doc(firestore, "users", user.uid), {
-        passwordChanged: true,
+        requiresPasswordChange: false,
         updatedAt: new Date(),
       });
 

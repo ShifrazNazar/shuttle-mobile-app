@@ -23,7 +23,8 @@ const BusAssignmentCard: React.FC<BusAssignmentCardProps> = ({ busId }) => {
             No Bus Assigned
           </Text>
           <Text className="text-white text-center text-sm opacity-90 mt-1">
-            Contact administrator to get assigned to a bus
+            Please contact the administrator at admin@apu.edu.my to be assigned
+            to a bus.
           </Text>
         </View>
       )}

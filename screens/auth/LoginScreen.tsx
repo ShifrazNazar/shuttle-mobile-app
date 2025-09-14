@@ -118,7 +118,8 @@ const LoginScreen: React.FC = () => {
 
           <View className="flex-row justify-center mt-6">
             <Text className="theme-text-secondary text-center text-sm">
-              Contact your administrator to create an account
+              To create an account, please contact your administrator at
+              admin@apu.edu.my
             </Text>
           </View>
         </View>
