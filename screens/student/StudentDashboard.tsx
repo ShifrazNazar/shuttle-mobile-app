@@ -25,7 +25,7 @@ import { useRouteAssignments } from "../../hooks/useRouteAssignments";
 import { RouteData, RouteAssignment, StudentDashboardProps } from "../../types";
 
 const StudentDashboard: React.FC<StudentDashboardProps> = () => {
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
   const { routes, loading: routesLoading, error: routesError } = useRoutes();
   const { assignments: routeAssignments, loading: assignmentsLoading } =
     useRouteAssignments();

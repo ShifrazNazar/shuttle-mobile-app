@@ -109,9 +109,6 @@ export interface TrackingButtonProps {
   busId: string;
   onStartTracking: () => void;
   onStopTracking: () => void;
-  isDemoMode?: boolean;
-  onStartDemo?: () => void;
-  onStopDemo?: () => void;
   disabled?: boolean;
 }
 
