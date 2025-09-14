@@ -1,15 +1,8 @@
 import React from "react";
 import { Text, TouchableOpacity } from "react-native";
+import { TrackingButtonProps } from "../../types";
 
-interface TrackingButtonProps {
-  isTracking: boolean;
-  busId: string;
-  onStartTracking: () => void;
-  onStopTracking: () => void;
-  isDemoMode?: boolean;
-  onStartDemo?: () => void;
-  onStopDemo?: () => void;
-}
+
 
 const TrackingButton: React.FC<TrackingButtonProps> = ({
   isTracking,

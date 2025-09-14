@@ -1,4 +1,5 @@
 import { stopDriverLocation, updateDriverLocation } from "../firebase-realtime";
+import { DemoConfig, DemoState } from "../../types";
 
 // Demo route waypoints for LRT Bukit Jalil to APU
 const DEMO_ROUTE_WAYPOINTS = [
@@ -13,22 +14,6 @@ const DEMO_ROUTE_WAYPOINTS = [
   { lat: 3.0555, lng: 101.6995, name: "Technology Park Center" },
   { lat: 3.05550753, lng: 101.7005763, name: "APU Campus - Jalan Teknologi 5" },
 ];
-
-export interface DemoConfig {
-  routeId: string;
-  busId: string;
-  driverId: string;
-  driverEmail?: string;
-  speed: number; // km/h
-  updateInterval: number; // ms
-}
-
-export interface DemoState {
-  isRunning: boolean;
-  currentWaypointIndex: number;
-  progress: number; // 0-1
-  startTime: number;
-}
 
 class DemoService {
   private demos: Map<string, DemoState> = new Map();

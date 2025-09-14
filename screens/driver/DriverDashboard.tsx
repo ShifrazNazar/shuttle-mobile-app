@@ -29,20 +29,7 @@ import StatusCard from "../../components/common/StatusCard";
 import TrackingButton from "../../components/driver/TrackingButton";
 import BusAssignmentCard from "../../components/driver/BusAssignmentCard";
 import RouteAssignmentCard from "../../components/driver/RouteAssignmentCard";
-
-interface RouteAssignment {
-  id: string;
-  routeId: string;
-  routeName: string;
-  origin: string;
-  destination: string;
-  status: "active" | "inactive" | "temporary";
-  assignedAt: any;
-}
-
-interface DriverDashboardProps {
-  navigation: any;
-}
+import { RouteAssignment, DriverDashboardProps } from "../../types";
 
 const DriverDashboard: React.FC<DriverDashboardProps> = ({ navigation }) => {
   const { signOut, user } = useAuth();

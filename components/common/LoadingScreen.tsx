@@ -1,9 +1,6 @@
 import React from "react";
 import { ActivityIndicator, Text, View } from "react-native";
-
-interface LoadingScreenProps {
-  message?: string;
-}
+import { LoadingScreenProps } from "../../types";
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
   message = "Loading...",

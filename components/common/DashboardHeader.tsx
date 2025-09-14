@@ -1,12 +1,6 @@
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-
-interface DashboardHeaderProps {
-  title: string;
-  subtitle: string;
-  icon: string;
-  onSignOut: () => void;
-}
+import { DashboardHeaderProps } from "../../types";
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   title,

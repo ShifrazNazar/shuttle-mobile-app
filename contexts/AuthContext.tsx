@@ -17,26 +17,13 @@ import {
 } from "firebase/auth";
 import { auth, firestore } from "../services/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { AuthResult, AuthContextType, AuthProviderProps } from "../../types";
 
 // Auth result interface
-interface AuthResult {
-  success: boolean;
-  user?: User;
-  error?: string;
-}
+
 
 // Auth context interface
-interface AuthContextType {
-  user: User | null;
-  role: string | null;
-  loading: boolean;
-  isFirstTimeLogin: boolean;
 
-  signIn: (email: string, password: string) => Promise<AuthResult>;
-  signOut: () => Promise<AuthResult>;
-  resetPassword: (email: string) => Promise<AuthResult>;
-  updatePassword: (newPassword: string) => Promise<AuthResult>;
-}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -48,9 +35,7 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

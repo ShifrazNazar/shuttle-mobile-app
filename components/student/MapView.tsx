@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import { MapViewProps } from "../../types";
 
 interface LocationData {
   busId: string;
@@ -11,25 +12,7 @@ interface LocationData {
   timestamp: number;
 }
 
-interface MapViewProps {
-  busLocation: LocationData | null;
-  allBuses: Record<string, LocationData>;
-  isTracking: boolean;
-  busId: string;
-  onStopTracking: () => void;
-  defaultRegion: {
-    latitude: number;
-    longitude: number;
-    latitudeDelta: number;
-    longitudeDelta: number;
-  };
-  getMapRegion: () => {
-    latitude: number;
-    longitude: number;
-    latitudeDelta: number;
-    longitudeDelta: number;
-  };
-}
+
 
 const StudentMapView: React.FC<MapViewProps> = ({
   busLocation,

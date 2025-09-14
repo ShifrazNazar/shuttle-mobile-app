@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  fetchLocationsFromFirestore,
-  LocationData,
-} from "../services/firestore/locations";
+import { fetchLocationsFromFirestore } from "../services/firestore/locations";
+import { LocationData } from "../types";
 
 export const useLocations = () => {
   const [locations, setLocations] = useState<LocationData[]>([]);

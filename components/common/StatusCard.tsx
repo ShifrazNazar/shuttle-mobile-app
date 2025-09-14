@@ -1,23 +1,6 @@
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-
-interface StatusItem {
-  label: string;
-  value: string | number;
-  type?: "text" | "status" | "badge";
-  statusColor?: "green" | "red" | "yellow" | "blue";
-}
-
-interface StatusCardProps {
-  title: string;
-  icon: string;
-  items: StatusItem[];
-  quickActions?: Array<{
-    label: string;
-    onPress: () => void;
-    color?: "blue" | "green" | "red";
-  }>;
-}
+import { StatusCardProps } from "../../types";
 
 const StatusCard: React.FC<StatusCardProps> = ({
   title,

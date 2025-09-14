@@ -24,23 +24,7 @@ import StudentMapView from "../../components/student/MapView";
 
 // Import constants and types
 import { useRoutes } from "../../hooks/useRoutes";
-import { RouteData } from "../../services/firestore/routes";
-
-interface RouteAssignment {
-  id: string;
-  routeId: string;
-  routeName: string;
-  driverId: string;
-  driverEmail: string;
-  driverUsername: string;
-  busId: string;
-  assignedAt: any;
-  status: "active" | "inactive" | "temporary";
-}
-
-interface StudentDashboardProps {
-  navigation: any;
-}
+import { RouteData, RouteAssignment, StudentDashboardProps } from "../../types";
 
 const StudentDashboard: React.FC<StudentDashboardProps> = () => {
   const { signOut, user } = useAuth();

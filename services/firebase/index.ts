@@ -5,16 +5,7 @@ import { Auth, getAuth } from "firebase/auth";
 import Constants from "expo-constants";
 
 // Firebase configuration interface
-interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-  measurementId?: string;
-  databaseURL?: string;
-}
+
 
 // Firebase configuration using environment variables
 const firebaseConfig: FirebaseConfig = {
@@ -62,4 +53,5 @@ export const auth: Auth = getAuth(app);
 
 // Initialize Firestore
 import { getFirestore } from "firebase/firestore";
+import { FirebaseConfig } from "../../types";
 export const firestore = getFirestore(app);

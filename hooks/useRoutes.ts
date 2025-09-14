@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  fetchRoutesFromFirestore,
-  RouteData,
-} from "../services/firestore/routes";
+import { fetchRoutesFromFirestore } from "../services/firestore/routes";
+import { RouteData } from "../types";
 
 export const useRoutes = () => {
   const [routes, setRoutes] = useState<RouteData[]>([]);

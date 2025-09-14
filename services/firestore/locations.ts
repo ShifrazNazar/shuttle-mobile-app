@@ -1,21 +1,6 @@
 import { collection, getDocs } from "firebase/firestore";
 import { firestore } from "../firebase";
-
-export interface LocationData {
-  locationId: string;
-  name: string;
-  fullName: string;
-  type:
-    | "university"
-    | "residential"
-    | "transport_hub"
-    | "religious"
-    | "commercial";
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-}
+import { LocationData } from "../../types";
 
 export const fetchLocationsFromFirestore = async (): Promise<
   LocationData[]

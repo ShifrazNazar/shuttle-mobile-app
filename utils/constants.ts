@@ -1,21 +1,5 @@
 // Configuration constants - avoid hardcoding values
-
-export interface AppConfig {
-  apiBaseUrl: string;
-  googleMapsApiKey: string;
-  firebaseConfig: {
-    apiKey: string;
-    authDomain: string;
-    projectId: string;
-    storageBucket: string;
-    messagingSenderId: string;
-    appId: string;
-  };
-  notificationConfig: {
-    defaultSound: string;
-    defaultBadge: number;
-  };
-}
+import { AppConfig } from "../types";
 
 export const APP_CONFIG: AppConfig = {
   apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || "https://api.example.com",

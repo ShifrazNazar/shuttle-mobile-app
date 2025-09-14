@@ -1,13 +1,6 @@
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-
-interface TabButtonProps {
-  tab: string;
-  icon: string;
-  label: string;
-  isActive: boolean;
-  onPress: () => void;
-}
+import { TabButtonProps } from "../../types";
 
 const TabButton: React.FC<TabButtonProps> = ({
   tab,

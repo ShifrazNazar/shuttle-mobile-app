@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, View } from "react-native";
+import { RouteAssignmentCardProps } from "../../types";
 
 interface RouteAssignment {
   id: string;
@@ -11,10 +12,7 @@ interface RouteAssignment {
   assignedAt: any;
 }
 
-interface RouteAssignmentCardProps {
-  assignedRoutes: RouteAssignment[];
-  routesLoading: boolean;
-}
+
 
 const RouteAssignmentCard: React.FC<RouteAssignmentCardProps> = ({
   assignedRoutes,

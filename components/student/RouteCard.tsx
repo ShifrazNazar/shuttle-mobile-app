@@ -1,39 +1,6 @@
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { RouteData } from "../../utils/constants";
-
-interface RouteAssignment {
-  id: string;
-  routeId: string;
-  routeName: string;
-  driverId: string;
-  driverEmail: string;
-  driverUsername: string;
-  busId: string;
-  assignedAt: any;
-  status: "active" | "inactive" | "temporary";
-}
-
-interface LocationData {
-  busId: string;
-  driverId: string;
-  driverEmail?: string;
-  latitude: number;
-  longitude: number;
-  timestamp: number;
-}
-
-interface RouteCardProps {
-  route: RouteData;
-  routeStatus: {
-    status: "active" | "completed" | "inactive";
-    text: string;
-  };
-  routeDrivers: RouteAssignment[];
-  activeBuses: Array<[string, LocationData]>;
-  onTrackBus: (busId: string) => void;
-  onViewMap: (busId: string) => void;
-}
+import { RouteCardProps } from "../../types";
 
 const RouteCard: React.FC<RouteCardProps> = ({
   route,

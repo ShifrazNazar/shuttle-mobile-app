@@ -1,17 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { demoService } from "../../services/demo";
+import { DemoBus } from "../../types";
 
-interface DemoBus {
-  driverId: string;
-  busId: string;
-  state: {
-    isRunning: boolean;
-    currentWaypointIndex: number;
-    progress: number;
-    startTime: number;
-  };
-}
+
 
 const DemoMonitor: React.FC = () => {
   const [demoBuses, setDemoBuses] = useState<DemoBus[]>([]);

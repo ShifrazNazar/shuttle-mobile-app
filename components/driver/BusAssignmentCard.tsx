@@ -1,9 +1,8 @@
 import React from "react";
 import { Text, View } from "react-native";
+import { BusAssignmentCardProps } from "../../types";
 
-interface BusAssignmentCardProps {
-  busId: string;
-}
+
 
 const BusAssignmentCard: React.FC<BusAssignmentCardProps> = ({ busId }) => {
   return (
