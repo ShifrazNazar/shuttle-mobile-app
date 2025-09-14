@@ -9,7 +9,7 @@ export default {
     icon: "./assets/images/icon.png",
     scheme: "myapp",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true,
+    newArchEnabled: false,
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.anonymous.shuttleapp",
@@ -63,6 +63,13 @@ export default {
             "Background location is needed to continuously track shuttle bus locations and provide real-time updates to students.",
           locationWhenInUsePermission:
             "Location access is needed to track shuttle bus positions and provide real-time location updates.",
+        },
+      ],
+      [
+        "expo-camera",
+        {
+          cameraPermission:
+            "This app needs camera access to scan student QR codes for boarding verification.",
         },
       ],
     ],

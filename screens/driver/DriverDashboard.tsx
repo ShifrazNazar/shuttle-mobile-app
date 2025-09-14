@@ -21,6 +21,7 @@ import StatusCard from "../../components/common/StatusCard";
 import TrackingButton from "../../components/driver/TrackingButton";
 import BusAssignmentCard from "../../components/driver/BusAssignmentCard";
 import RouteAssignmentCard from "../../components/driver/RouteAssignmentCard";
+import QRCodeScannerComponent from "../../components/driver/QRCodeScanner";
 
 // Import hooks and types
 import { useDriverRouteAssignments } from "../../hooks/useDriverRouteAssignments";
@@ -28,15 +29,18 @@ import { DriverDashboardProps } from "../../types";
 
 const DriverDashboard: React.FC<DriverDashboardProps> = () => {
   const { signOut, user } = useAuth();
-  const { assignments: assignedRoutes, loading: routesLoading } =
-    useDriverRouteAssignments(user?.uid || "");
-  const [isTracking, setIsTracking] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<LocationObject | null>(
-    null
+  const { assignments: assignedRoutes } = useDriverRouteAssignments(
+    user?.uid || ""
   );
+  const [isTracking, setIsTracking] = useState(false);
   const [driverId, setDriverId] = useState(user?.uid || "");
   const [busId, setBusId] = useState("");
   const [stopTracking, setStopTracking] = useState<(() => void) | null>(null);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [currentRouteId, setCurrentRouteId] = useState("");
+  const [currentLocation, setCurrentLocation] = useState<LocationObject | null>(
+    null
+  );
 
   // Update driverId when user changes
   useEffect(() => {
@@ -107,11 +111,11 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
       setIsTracking(true);
       Alert.alert("Success", "Location sharing started!");
     } catch (error) {
+      console.error("Error starting tracking:", error);
       Alert.alert(
         "Error",
         "Failed to start location sharing. Please check permissions."
       );
-      console.error(error);
     }
   };
 
@@ -130,6 +134,22 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
 
     setIsTracking(false);
     Alert.alert("Success", "Location sharing stopped!");
+  };
+
+  const handleQRScannerPress = () => {
+    if (assignedRoutes.length > 0) {
+      setCurrentRouteId(assignedRoutes[0].routeId);
+      setShowQRScanner(true);
+    } else {
+      Alert.alert(
+        "No Route Assigned",
+        "Please wait for a route assignment before scanning QR codes."
+      );
+    }
+  };
+
+  const handleBoardingSuccess = (record: any) => {
+    // Additional logic can be added here if needed
   };
 
   return (
@@ -151,6 +171,27 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
             onStartTracking={startTracking}
             onStopTracking={stopLocationTracking}
           />
+        </View>
+
+        {/* QR Scanner Button */}
+        <View className="mb-6">
+          <TouchableOpacity
+            className={`py-4 px-6 rounded-lg flex-row items-center justify-center ${
+              isTracking ? "bg-blue-600" : "bg-gray-400"
+            }`}
+            onPress={handleQRScannerPress}
+            disabled={false} // Always enabled for testing
+          >
+            <Text className="text-white text-lg font-semibold mr-2">📱</Text>
+            <Text className="text-white text-lg font-semibold">
+              Scan Student QR Code
+            </Text>
+          </TouchableOpacity>
+          {!isTracking && (
+            <Text className="text-gray-500 text-sm text-center mt-2">
+              Note: Start tracking for full functionality
+            </Text>
+          )}
         </View>
 
         {/* Assigned Bus Info */}
@@ -196,6 +237,15 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
           ]}
         />
       </View>
+
+      {/* QR Scanner Modal */}
+      <QRCodeScannerComponent
+        visible={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        shuttleId={busId}
+        routeId={currentRouteId}
+        onBoardingSuccess={handleBoardingSuccess}
+      />
     </SafeAreaView>
   );
 };

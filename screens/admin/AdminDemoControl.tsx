@@ -4,11 +4,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
 import {
-  startFullService,
-  startBidirectionalDemo,
-  stopAllDemos,
-  getDemoStatus,
   getAvailableScenarios,
+  getDemoStatus,
+  startBidirectionalDemo,
+  startFullService,
+  stopAllDemos,
 } from "../../services/demo";
 import DashboardHeader from "../../components/common/DashboardHeader";
 import StatusCard from "../../components/common/StatusCard";

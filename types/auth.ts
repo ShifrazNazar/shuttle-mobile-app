@@ -23,3 +23,37 @@ export interface AuthContextType {
 export interface AuthProviderProps {
   children: ReactNode;
 }
+
+// Digital Travel Card Types
+export interface DigitalTravelCard {
+  cardId: string;
+  studentId: string;
+  userId: string;
+  qrCode: string;
+  isActive: boolean;
+  createdAt: Date;
+  lastUsed?: Date;
+  usageCount: number;
+}
+
+export interface BoardingRecord {
+  recordId: string;
+  studentId: string;
+  driverId: string;
+  shuttleId: string;
+  routeId: string;
+  boardingTime: Date;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  status: "success" | "failed" | "invalid";
+  reason?: string;
+}
+
+export interface QRCodeData {
+  studentId: string;
+  userId: string;
+  timestamp: number;
+  signature: string;
+}

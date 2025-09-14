@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { TabButtonProps } from "../../types";
 
 const TabButton: React.FC<TabButtonProps> = ({
-  tab,
+  tab: _tab,
   icon,
   label,
   isActive,

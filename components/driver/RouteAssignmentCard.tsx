@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { RouteAssignmentCardProps } from "../../types";
 
 const RouteAssignmentCard: React.FC<RouteAssignmentCardProps> = ({

@@ -18,26 +18,26 @@ import StatusCard from "../../components/common/StatusCard";
 import RouteCard from "../../components/student/RouteCard";
 import RouteFilter from "../../components/student/RouteFilter";
 import StudentMapView from "../../components/student/MapView";
+import DigitalTravelCardComponent from "../../components/student/DigitalTravelCard";
 
 // Import hooks and types
 import { useRoutes } from "../../hooks/useRoutes";
 import { useRouteAssignments } from "../../hooks/useRouteAssignments";
-import { RouteData, RouteAssignment, StudentDashboardProps } from "../../types";
+import { RouteData, StudentDashboardProps } from "../../types";
 
 const StudentDashboard: React.FC<StudentDashboardProps> = () => {
   const { signOut } = useAuth();
   const { routes, loading: routesLoading, error: routesError } = useRoutes();
-  const { assignments: routeAssignments, loading: assignmentsLoading } =
-    useRouteAssignments();
+  const { assignments: routeAssignments } = useRouteAssignments();
   const [busId, setBusId] = useState("");
   const [busLocation, setBusLocation] = useState<LocationData | null>(null);
   const [userLocation, setUserLocation] = useState<LocationObject | null>(null);
   const [allBuses, setAllBuses] = useState<Record<string, LocationData>>({});
   const [isTracking, setIsTracking] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"routes" | "map" | "status">(
-    "routes"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "routes" | "map" | "status" | "card"
+  >("routes");
   const stopAlertShownRef = useRef<string | null>(null);
   const isMountedRef = useRef(true);
   const mapRef = useRef<MapView | null>(null);
@@ -168,7 +168,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
                 [{ text: "OK" }]
               );
             }, 100);
-          } catch (e) {
+          } catch (_e) {
             // no-op: avoid crashing on alert edge-cases
           }
         }
@@ -225,8 +225,8 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
     if (mapReadyRef.current && mapRef.current) {
       try {
         mapRef.current.animateToRegion(target, 500);
-      } catch (e) {
-        console.error("Error animating to region:", e);
+      } catch (_e) {
+        console.error("Error animating to region:", _e);
       }
     }
   }, [
@@ -241,6 +241,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
     { id: "routes", icon: "🛣️", label: "Routes" },
     { id: "map", icon: "🗺️", label: "Map" },
     { id: "status", icon: "📊", label: "Status" },
+    { id: "card", icon: "💳", label: "Travel Card" },
   ];
 
   // Routes Tab Content
@@ -430,7 +431,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={(tabId) =>
-          setActiveTab(tabId as "routes" | "map" | "status")
+          setActiveTab(tabId as "routes" | "map" | "status" | "card")
         }
       />
 
@@ -439,6 +440,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
         {activeTab === "routes" && <RoutesTab />}
         {activeTab === "map" && <MapTab />}
         {activeTab === "status" && <StatusTab />}
+        {activeTab === "card" && <DigitalTravelCardComponent />}
       </View>
     </SafeAreaView>
   );

@@ -17,7 +17,7 @@ import {
 } from "firebase/auth";
 import { auth, firestore } from "../services/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { AuthResult, AuthContextType, AuthProviderProps } from "../types";
+import { AuthContextType, AuthProviderProps, AuthResult } from "../types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setRole(null);
             setIsFirstTimeLogin(false);
           }
-        } catch (e) {
+        } catch (_e) {
           setUser(user);
           setRole(null);
           setIsFirstTimeLogin(false);
@@ -91,7 +91,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setRole(null);
           setIsFirstTimeLogin(false);
         }
-      } catch (e) {
+      } catch (_e) {
         setRole(null);
         setIsFirstTimeLogin(false);
       }
