@@ -89,33 +89,6 @@ To develop a cross-platform mobile app that enhances campus commuting by giving 
 
 ---
 
-## 📦 Project Structure
-
-```
-/smart-shuttle-app
-├── /app                  # Entry point and route definitions
-├── /assets                 # Images, fonts, static files
-├── /components            # Reusable UI components
-│   ├── /common           # Generic components
-│   ├── /student          # Student-specific components
-│   └── /driver           # Driver-specific components
-├── /screens              # Screen components
-│   ├── /auth            # Login/signup screens
-│   ├── /student         # Student app screens
-│   └── /driver          # Driver app screens
-├── /services            # API and external service integrations
-│   ├── /firebase        # Firebase configuration
-│   ├── /location        # GPS and location services
-│   └── /notifications   # Push notification logic
-├── /contexts            # React Context providers
-├── /utils               # Helper functions and constants
-├── /hooks               # Custom React hooks
-├── app.json             # Expo configuration
-└── package.json
-```
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -154,71 +127,6 @@ To develop a cross-platform mobile app that enhances campus commuting by giving 
    npx expo start
    ```
 
-### Testing the App
-
-**Driver Mode:**
-
-- Select "Driver Mode" from main screen
-- Enter Driver ID and Bus ID
-- Grant location permissions
-- Tap "Start Tracking" to share location
-
-**Student Mode:**
-
-- Select "Student Mode" from main screen
-- Enter Bus ID to track
-- Tap "Track Bus" to see real-time location
-
-📖 **Detailed setup instructions:** See [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md)
-
-### Development Options
-
-- **[Development Build](https://docs.expo.dev/develop/development-builds/introduction/)** - Custom native runtime
-- **[Android Emulator](https://docs.expo.dev/workflow/android-studio-emulator/)** - Android testing
-- **[iOS Simulator](https://docs.expo.dev/workflow/ios-simulator/)** - iOS testing
-- **[Expo Go](https://expo.dev/go)** - Quick testing sandbox
-
----
-
-## 🔧 Configuration
-
-### Environment Setup
-
-Create a `.env` file in the root directory:
-
-```env
-EXPO_PUBLIC_FIREBASE_API_KEY=your_api_key
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
-EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_maps_key
-```
-
-### Firebase Setup
-
-1. Create a Firebase project
-2. Enable Authentication, Firestore, and Cloud Messaging
-3. Download `google-services.json` (Android) and `GoogleService-Info.plist` (iOS)
-4. Place configuration files in appropriate directories
-
----
-
-## 📍 Location & GPS Notes
-
-- **Drivers**: Require background location access for continuous tracking
-- **Students**: Only need foreground location access for map viewing
-- Uses `expo-location` with `TaskManager` for background updates
-- Location permissions handled gracefully with fallback options
-
----
-
-## 🔔 Push Notifications
-
-- Built with `expo-notifications`
-- User tokens stored for targeted messaging
-- Supports both scheduled and real-time alerts
-- Admin panel integration for broadcast messages
-
----
-
 ## 📚 Learn More
 
 - **[Expo Documentation](https://docs.expo.dev/)** - Learn fundamentals and advanced topics
@@ -252,12 +160,3 @@ This moves starter code to **app-example** directory and creates a blank **app**
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-## 👨‍💻 Development Notes
-
-- Use **feature-based folder structure** for scalability
-- Keep **role-specific logic separated** (student vs. driver interfaces)
-- Implement **modular services** for auth, location, database, and notifications
-- Store configuration in `/utils/constants.js` - avoid hardcoding
-- Follow React Native and Expo best practices for performance
-- Implement proper error handling and offline functionality
