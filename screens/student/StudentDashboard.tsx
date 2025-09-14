@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Dimensions, ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 import MapView from "react-native-maps";
 import {
   getActiveBuses,
@@ -23,9 +23,8 @@ import RouteFilter from "../../components/student/RouteFilter";
 import StudentMapView from "../../components/student/MapView";
 
 // Import constants and types
-import { fetchRoutesData, RouteData } from "../../utils/constants";
-
-const { width } = Dimensions.get("window");
+import { useRoutes } from "../../hooks/useRoutes";
+import { RouteData } from "../../services/firestore/routes";
 
 interface RouteAssignment {
   id: string;
@@ -43,19 +42,18 @@ interface StudentDashboardProps {
   navigation: any;
 }
 
-const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
+const StudentDashboard: React.FC<StudentDashboardProps> = () => {
   const { signOut, user } = useAuth();
+  const { routes, loading: routesLoading, error: routesError } = useRoutes();
   const [busId, setBusId] = useState("");
   const [busLocation, setBusLocation] = useState<LocationData | null>(null);
   const [userLocation, setUserLocation] = useState<LocationObject | null>(null);
   const [allBuses, setAllBuses] = useState<Record<string, LocationData>>({});
   const [isTracking, setIsTracking] = useState(false);
-  const [routes, setRoutes] = useState<RouteData[]>([]);
   const [routeAssignments, setRouteAssignments] = useState<RouteAssignment[]>(
     []
   );
   const [selectedRoute, setSelectedRoute] = useState<string>("");
-  const [routesLoading, setRoutesLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"routes" | "map" | "status">(
     "routes"
   );
@@ -73,15 +71,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
     }
   };
 
-  // Fetch routes data from constants
-  const loadRoutesData = async () => {
-    try {
-      const routesData = await fetchRoutesData();
-      setRoutes(routesData);
-    } catch (error) {
-      console.error("Error loading routes data:", error);
-    }
-  };
+  // Routes are now managed by the useRoutes hook
 
   // Setup route assignments listener
   const setupRouteAssignmentsListener = () => {
@@ -104,18 +94,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
           });
 
           setRouteAssignments(assignments);
-          setRoutesLoading(false);
         },
         (error) => {
           console.error("Error listening to route assignments:", error);
-          setRoutesLoading(false);
         }
       );
 
       return unsubscribe;
     } catch (error) {
       console.error("Error setting up route assignments listener:", error);
-      setRoutesLoading(false);
       return null;
     }
   };
@@ -169,8 +156,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
       setAllBuses(buses);
     });
 
-    // Load routes data
-    loadRoutesData();
+    // Routes are automatically loaded by useRoutes hook
 
     // Setup route assignments listener
     const unsubscribeRoutes = setupRouteAssignmentsListener();
@@ -339,6 +325,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ navigation }) => {
           <View className="bg-[#f3f4f6] p-4 rounded-[8px]">
             <Text className="text-center text-[#6b7280]">
               Loading routes...
+            </Text>
+          </View>
+        ) : routesError ? (
+          <View className="bg-red-50 p-4 rounded-[8px] border border-red-200">
+            <Text className="text-center text-red-600 mb-2">
+              Error loading routes
+            </Text>
+            <Text className="text-center text-red-500 text-sm">
+              {routesError}
             </Text>
           </View>
         ) : (
