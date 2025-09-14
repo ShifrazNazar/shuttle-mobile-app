@@ -8,7 +8,6 @@ const TrackingButton: React.FC<TrackingButtonProps> = ({
   onStartTracking,
   onStopTracking,
   isDemoMode = false,
-  onStartDemo: _onStartDemo,
   onStopDemo,
 }) => {
   if (!isTracking) {

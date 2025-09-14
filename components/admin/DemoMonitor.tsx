@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { demoService } from "../../services/demo";
-import { DemoBus, LocationData } from "../../types";
+import { DemoBus } from "../../types";
 
 const DemoMonitor: React.FC = () => {
   const [demoBuses, setDemoBuses] = useState<DemoBus[]>([]);
@@ -55,7 +55,7 @@ const DemoMonitor: React.FC = () => {
         </View>
       ) : (
         <ScrollView className="max-h-64">
-          {demoBuses.map((demo, _index) => (
+          {demoBuses.map((demo) => (
             <View
               key={`${demo.driverId}-${demo.busId}`}
               className="bg-purple-50 p-3 rounded-[8px] mb-2 border border-purple-200"

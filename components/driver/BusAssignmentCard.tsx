@@ -2,8 +2,6 @@ import React from "react";
 import { Text, View } from "react-native";
 import { BusAssignmentCardProps } from "../../types";
 
-
-
 const BusAssignmentCard: React.FC<BusAssignmentCardProps> = ({ busId }) => {
   return (
     <View className="bg-white p-4 rounded-[12px] border border-[#e5e7eb] shadow-sm mb-6">

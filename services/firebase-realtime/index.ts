@@ -100,7 +100,7 @@ export const getActiveBuses = (
     const data = snapshot.val();
     if (data) {
       const activeBuses: Record<string, LocationData> = {};
-      Object.entries(data).forEach(([_driverId, location]) => {
+      Object.entries(data).forEach(([, location]) => {
         const locationData = location as LocationData;
         if (locationData.isActive === true) {
           activeBuses[locationData.busId] = locationData;
