@@ -78,6 +78,32 @@ export default function Index() {
               </View>
             </View>
           </TouchableOpacity>
+
+          <View className="h-px bg-[#e5e7eb] my-4" />
+
+          {/* Admin Card */}
+          <TouchableOpacity
+            className="bg-white p-5 rounded-[12px] border border-[#e5e7eb] shadow-sm"
+            onPress={() => router.push("/admin")}
+            activeOpacity={0.7}
+          >
+            <View className="flex-row items-center">
+              <View className="bg-[#f3e8ff] p-3 rounded-[8px] mr-4">
+                <Text className="text-xl">🎭</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-lg font-semibold text-[#0f172a] mb-2">
+                  Admin Mode
+                </Text>
+                <Text className="text-[#475569] text-sm leading-5">
+                  Manage demo scenarios and system controls
+                </Text>
+              </View>
+              <View className="bg-[#8b5cf6] p-2 rounded-[8px]">
+                <Text className="text-white text-sm font-medium">→</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
         {/* Footer */}
         <View className="mt-auto pt-6 pb-6">

@@ -55,9 +55,19 @@ export const updateDriverLocation = async (
 export const stopDriverLocation = async (driverId: string) => {
   try {
     await remove(ref(database, `activeDrivers/${driverId}`));
-    console.log("Driver location tracking stopped for:", driverId);
   } catch (error) {
-    console.error("Error stopping driver location:", error);
+    console.error(`Error stopping driver location for ${driverId}:`, error);
+    throw error;
+  }
+};
+
+// Stop all driver locations (clear entire activeDrivers node)
+export const stopAllDriverLocations = async () => {
+  try {
+    await remove(ref(database, `activeDrivers`));
+  } catch (error) {
+    console.error("Error stopping all driver locations:", error);
+    throw error;
   }
 };
 

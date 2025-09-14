@@ -22,6 +22,8 @@ function AuthGuard() {
             router.replace("/driver");
           } else if (role === "student") {
             router.replace("/student");
+          } else if (role === "admin") {
+            router.replace("/admin");
           }
         }
       }

@@ -1,4 +1,8 @@
-import { stopDriverLocation, updateDriverLocation } from "../firebase-realtime";
+import {
+  stopAllDriverLocations,
+  stopDriverLocation,
+  updateDriverLocation,
+} from "../firebase-realtime";
 import { DemoConfig, DemoState } from "../../types";
 
 // APU Shuttle Services Routes (Effective 2 May 2025)
@@ -232,11 +236,10 @@ class DemoService {
 
     this.intervals.set(demoKey, interval);
 
-    console.log(`🚌 Demo started: ${routeId} - Bus ${busId}`);
     return Promise.resolve(true);
   }
 
-  stopDemo(driverId: string, busId: string): Promise<boolean> {
+  async stopDemo(driverId: string, busId: string): Promise<boolean> {
     const demoKey = `${driverId}-${busId}`;
 
     // Clear interval
@@ -246,16 +249,25 @@ class DemoService {
       this.intervals.delete(demoKey);
     }
 
-    // Update demo state
+    // Update demo state and remove from demos map
     const demoState = this.demos.get(demoKey);
     if (demoState) {
       demoState.isRunning = false;
     }
 
-    // Stop location tracking in Firebase
-    stopDriverLocation(driverId);
+    // Remove from demos map completely
+    this.demos.delete(demoKey);
 
-    console.log(`🛑 Demo stopped: Bus ${busId}`);
+    // Stop location tracking in Firebase
+    try {
+      await stopDriverLocation(driverId);
+    } catch (error) {
+      console.error(
+        `Failed to stop Firebase location for driver ${driverId}:`,
+        error
+      );
+    }
+
     return Promise.resolve(true);
   }
 
@@ -301,7 +313,6 @@ class DemoService {
 
     // Check if demo is complete
     if (progress >= 1) {
-      console.log(`✅ Demo completed: ${routeId} - Bus ${busId}`);
       this.stopDemo(driverId, busId);
     }
   }
@@ -371,6 +382,33 @@ class DemoService {
 
     return activeDemos;
   }
+
+  /**
+   * Force clear all intervals and demos
+   */
+  async forceClearAll(): Promise<void> {
+    // Clear all intervals
+    for (const [, interval] of this.intervals.entries()) {
+      global.clearInterval(interval);
+    }
+    this.intervals.clear();
+
+    // Clear all demos
+    for (const [, state] of this.demos.entries()) {
+      state.isRunning = false;
+    }
+    this.demos.clear();
+
+    // Clear all driver locations from Realtime Database
+    try {
+      await stopAllDriverLocations();
+    } catch (error) {
+      console.error(
+        "Failed to clear driver locations from Realtime DB:",
+        error
+      );
+    }
+  }
 }
 
 class MultiBusDemoManager {
@@ -385,11 +423,6 @@ class MultiBusDemoManager {
     scenarioName: keyof typeof DEMO_SCENARIOS
   ): Promise<void> {
     const scenario = DEMO_SCENARIOS[scenarioName];
-
-    console.log(
-      `🚀 Starting ${scenario.name} scenario with ${scenario.buses.length} buses`
-    );
-    console.log(`📝 ${scenario.description}`);
 
     for (const busConfig of scenario.buses) {
       const { delay, ...config } = busConfig;
@@ -407,7 +440,6 @@ class MultiBusDemoManager {
     }
 
     this.activeScenarios.add(scenarioName);
-    console.log(`✅ ${scenario.name} scenario scheduled`);
   }
 
   /**
@@ -436,10 +468,7 @@ class MultiBusDemoManager {
       driverEmail: config.driverEmail,
       speed: config.speed,
       updateInterval: config.updateInterval,
-      routeName:
-        config.routeId === "R001"
-          ? "LRT Bukit Jalil to APU"
-          : "APU to LRT Bukit Jalil",
+      routeName: baseConfig.routeId,
       waypoints: baseConfig.waypoints.map((wp) => ({
         latitude: wp.lat,
         longitude: wp.lng,
@@ -448,11 +477,8 @@ class MultiBusDemoManager {
 
     try {
       await demoService.startDemo(demoConfig);
-      console.log(
-        `🚌 Started bus ${config.busId} (${config.driverEmail}) on route ${config.routeId}`
-      );
     } catch (error) {
-      console.error(`❌ Failed to start bus ${config.busId}:`, error);
+      console.error(`Failed to start bus ${config.busId}:`, error);
     }
   }
 
@@ -461,8 +487,6 @@ class MultiBusDemoManager {
    */
   async stopScenario(scenarioName: keyof typeof DEMO_SCENARIOS): Promise<void> {
     const scenario = DEMO_SCENARIOS[scenarioName];
-
-    console.log(`🛑 Stopping ${scenario.name} scenario`);
 
     // Clear any pending timeouts
     for (const busConfig of scenario.buses) {
@@ -477,29 +501,23 @@ class MultiBusDemoManager {
     }
 
     this.activeScenarios.delete(scenarioName);
-    console.log(`✅ ${scenario.name} scenario stopped`);
   }
 
   /**
    * Stop all active demos
    */
   async stopAllDemos(): Promise<void> {
-    console.log("🛑 Stopping all demos");
-
-    // Clear all timeouts
+    // Clear all timeouts first
     for (const [, timeoutId] of this.timeouts.entries()) {
       global.clearTimeout(timeoutId);
     }
     this.timeouts.clear();
 
-    // Stop all active demos
-    const activeDemos = demoService.getAllActiveDemos();
-    for (const demo of activeDemos) {
-      await demoService.stopDemo(demo.driverId, demo.busId);
-    }
+    // Force clear all demo intervals and states
+    await demoService.forceClearAll();
 
+    // Clear all active scenarios
     this.activeScenarios.clear();
-    console.log("✅ All demos stopped");
   }
 
   /**

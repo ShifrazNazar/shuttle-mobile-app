@@ -14,15 +14,6 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { doc, getDoc } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
-import {
-  DEMO_CONFIGS,
-  demoService,
-  startFullService,
-  startBidirectionalDemo,
-  stopAllDemos,
-  getDemoStatus,
-  getAvailableScenarios,
-} from "../../services/demo";
 
 // Import components
 import DashboardHeader from "../../components/common/DashboardHeader";
@@ -30,7 +21,6 @@ import StatusCard from "../../components/common/StatusCard";
 import TrackingButton from "../../components/driver/TrackingButton";
 import BusAssignmentCard from "../../components/driver/BusAssignmentCard";
 import RouteAssignmentCard from "../../components/driver/RouteAssignmentCard";
-import DemoScenarioSelector from "../../components/driver/DemoScenarioSelector";
 
 // Import hooks and types
 import { useDriverRouteAssignments } from "../../hooks/useDriverRouteAssignments";
@@ -47,10 +37,6 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
   const [driverId, setDriverId] = useState(user?.uid || "");
   const [busId, setBusId] = useState("");
   const [stopTracking, setStopTracking] = useState<(() => void) | null>(null);
-  const [activeDemoScenario, setActiveDemoScenario] = useState<string | null>(
-    null
-  );
-  const [availableScenarios, setAvailableScenarios] = useState<any[]>([]);
 
   // Update driverId when user changes
   useEffect(() => {
@@ -99,9 +85,6 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
     // Fetch assigned bus
     fetchAssignedBus();
 
-    // Load available demo scenarios
-    setAvailableScenarios(getAvailableScenarios());
-
     // Route assignments are automatically managed by useDriverRouteAssignments hook
   }, [user]);
 
@@ -149,41 +132,6 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
     Alert.alert("Success", "Location sharing stopped!");
   };
 
-  const handleScenarioDemo = async (scenarioKey: string) => {
-    try {
-      if (activeDemoScenario === scenarioKey) {
-        await stopAllDemos();
-        setActiveDemoScenario(null);
-        Alert.alert("Success", "Demo stopped!");
-      } else {
-        // Stop current demo if running
-        if (activeDemoScenario) {
-          await stopAllDemos();
-        }
-
-        // Start new scenario
-        switch (scenarioKey) {
-          case "FULL_SERVICE":
-            await startFullService();
-            break;
-          case "BIDIRECTIONAL":
-            await startBidirectionalDemo();
-            break;
-          default:
-            Alert.alert("Error", "Unknown scenario");
-            return;
-        }
-
-        setActiveDemoScenario(scenarioKey);
-        const scenario = availableScenarios.find((s) => s.key === scenarioKey);
-        Alert.alert("Success", `${scenario?.name} started!`);
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to control demo");
-      console.error(error);
-    }
-  };
-
   return (
     <SafeAreaView className="flex-1 bg-[#f7f8fb]">
       {/* Header */}
@@ -195,15 +143,6 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
       />
 
       <View className="flex-1 p-6">
-        {/* Demo Scenarios */}
-        {!isTracking && (
-          <DemoScenarioSelector
-            scenarios={availableScenarios}
-            activeScenario={activeDemoScenario}
-            onScenarioSelect={handleScenarioDemo}
-          />
-        )}
-
         {/* Main Tracking Button */}
         <View className="mb-6">
           <TrackingButton
@@ -245,14 +184,6 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
               value: isTracking ? "🟢 ACTIVE" : "🔴 INACTIVE",
               type: "status",
               statusColor: isTracking ? "green" : "red",
-            },
-            {
-              label: "Demo Scenario",
-              value: activeDemoScenario
-                ? `🟢 ${activeDemoScenario}`
-                : "🔴 NONE",
-              type: "status",
-              statusColor: activeDemoScenario ? "green" : "red",
             },
             {
               label: "Bus",
