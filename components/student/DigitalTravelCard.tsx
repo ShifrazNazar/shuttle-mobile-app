@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -87,9 +86,9 @@ const DigitalTravelCardComponent: React.FC<DigitalTravelCardProps> = ({
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="flex-1 items-center justify-center bg-slate-50">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text style={styles.loadingText}>
+        <Text className="mt-4 text-base text-slate-500">
           Loading your digital travel card...
         </Text>
       </View>
@@ -98,25 +97,32 @@ const DigitalTravelCardComponent: React.FC<DigitalTravelCardProps> = ({
 
   if (!travelCard) {
     return (
-      <View style={styles.errorContainer}>
+      <View className="flex-1 items-center justify-center bg-slate-50 px-8">
         <Ionicons name="card-outline" size={48} color="#EF4444" />
-        <Text style={styles.errorText}>Failed to load digital travel card</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={loadTravelCard}>
-          <Text style={styles.retryButtonText}>Retry</Text>
+        <Text className="mt-4 text-center text-base text-red-500">
+          Failed to load digital travel card
+        </Text>
+        <TouchableOpacity
+          className="mt-4 rounded-lg bg-blue-500 px-6 py-3"
+          onPress={loadTravelCard}
+        >
+          <Text className="text-base font-semibold text-white">Retry</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
+    <View className="flex-1 bg-slate-50 p-4">
+      <View className="mb-5 flex-row items-center justify-between">
+        <View className="flex-row items-center">
           <Ionicons name="card" size={24} color="#3B82F6" />
-          <Text style={styles.headerTitle}>Digital Travel Card</Text>
+          <Text className="ml-2 text-xl font-semibold text-gray-800">
+            Digital Travel Card
+          </Text>
         </View>
         <TouchableOpacity
-          style={styles.refreshButton}
+          className="rounded-lg bg-gray-100 p-2"
           onPress={refreshCard}
           disabled={refreshing}
         >
@@ -128,16 +134,18 @@ const DigitalTravelCardComponent: React.FC<DigitalTravelCardProps> = ({
         </TouchableOpacity>
       </View>
 
-      <View style={styles.cardContainer}>
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.studentId}>Student ID: {studentId}</Text>
-            <Text style={styles.cardStatus}>
+      <View className="mb-6 items-center">
+        <View className="w-full max-w-[400px] items-center rounded-2xl bg-white p-6 shadow-md">
+          <View className="mb-5 w-full flex-row items-center justify-between">
+            <Text className="text-base font-semibold text-gray-800">
+              Student ID: {studentId}
+            </Text>
+            <Text className="text-sm font-medium text-emerald-500">
               {travelCard.isActive ? "Active" : "Inactive"}
             </Text>
           </View>
 
-          <View style={styles.qrContainer}>
+          <View className="mb-5 rounded-xl bg-gray-50 p-4">
             <QRCode
               value={travelCard.qrCode}
               size={width * 0.6}
@@ -146,170 +154,30 @@ const DigitalTravelCardComponent: React.FC<DigitalTravelCardProps> = ({
             />
           </View>
 
-          <View style={styles.cardFooter}>
-            <Text style={styles.usageText}>
+          <View className="w-full items-center">
+            <Text className="mb-1 text-sm text-slate-500">
               Used {travelCard.usageCount} times
             </Text>
           </View>
         </View>
       </View>
 
-      <View style={styles.instructions}>
-        <Text style={styles.instructionsTitle}>How to use:</Text>
-        <Text style={styles.instructionText}>
+      <View className="rounded-xl bg-white p-4 shadow-sm">
+        <Text className="mb-3 text-base font-semibold text-gray-800">
+          How to use:
+        </Text>
+        <Text className="mb-2 text-sm leading-5 text-slate-500">
           1. Show this QR code to the driver when boarding
         </Text>
-        <Text style={styles.instructionText}>
+        <Text className="mb-2 text-sm leading-5 text-slate-500">
           2. The driver will scan it to verify your identity
         </Text>
-        <Text style={styles.instructionText}>
+        <Text className="mb-2 text-sm leading-5 text-slate-500">
           3. QR code refreshes automatically every 5 minutes
         </Text>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8FAFC",
-    padding: 16,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F8FAFC",
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: "#6B7280",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F8FAFC",
-    padding: 32,
-  },
-  errorText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: "#EF4444",
-    textAlign: "center",
-  },
-  retryButton: {
-    marginTop: 16,
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerTitle: {
-    marginLeft: 8,
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#1F2937",
-  },
-  refreshButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: "#F3F4F6",
-  },
-  cardContainer: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 24,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    width: "100%",
-    maxWidth: 400,
-  },
-  cardHeader: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  studentId: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
-  },
-  cardStatus: {
-    fontSize: 14,
-    color: "#10B981",
-    fontWeight: "500",
-  },
-  qrContainer: {
-    padding: 16,
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  cardFooter: {
-    width: "100%",
-    alignItems: "center",
-  },
-  usageText: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 4,
-  },
-  instructions: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  instructionsTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 12,
-  },
-  instructionText: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 8,
-    lineHeight: 20,
-  },
-});
 
 export default DigitalTravelCardComponent;

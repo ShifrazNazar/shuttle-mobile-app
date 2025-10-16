@@ -4,7 +4,6 @@ import {
   Alert,
   Dimensions,
   Modal,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -162,9 +161,9 @@ const QRCodeScannerComponent: React.FC<QRCodeScannerProps> = ({
   if (!permission) {
     return (
       <Modal visible={visible} transparent animationType="slide">
-        <View style={styles.permissionContainer}>
+        <View className="flex-1 items-center justify-center bg-[rgba(0,0,0,0.9)] p-8">
           <ActivityIndicator size="large" color="#3B82F6" />
-          <Text style={styles.permissionText}>
+          <Text className="my-4 text-center text-base text-white">
             Requesting camera permission...
           </Text>
         </View>
@@ -175,19 +174,24 @@ const QRCodeScannerComponent: React.FC<QRCodeScannerProps> = ({
   if (!permission.granted) {
     return (
       <Modal visible={visible} transparent animationType="slide">
-        <View style={styles.permissionContainer}>
+        <View className="flex-1 items-center justify-center bg-[rgba(0,0,0,0.9)] p-8">
           <Ionicons name="camera" size={64} color="#EF4444" />
-          <Text style={styles.permissionText}>
+          <Text className="my-4 text-center text-base text-white">
             Camera permission is required to scan QR codes
           </Text>
           <TouchableOpacity
-            style={styles.permissionButton}
+            className="my-2 rounded-lg bg-blue-500 px-6 py-3"
             onPress={requestPermission}
           >
-            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            <Text className="text-base font-semibold text-white">
+              Grant Permission
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.closeButton} onPress={closeScanner}>
-            <Text style={styles.closeButtonText}>Close</Text>
+          <TouchableOpacity
+            className="my-2 rounded-lg bg-[rgba(255,255,255,0.2)] px-6 py-3"
+            onPress={closeScanner}
+          >
+            <Text className="text-base text-white">Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -196,20 +200,25 @@ const QRCodeScannerComponent: React.FC<QRCodeScannerProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
+      <View className="flex-1 bg-black">
+        <View className="flex-row items-center justify-between bg-[rgba(0,0,0,0.8)] px-4 py-3">
+          <View className="flex-row items-center">
             <Ionicons name="qr-code" size={24} color="#FFFFFF" />
-            <Text style={styles.headerTitle}>Scan Student QR Code</Text>
+            <Text className="ml-2 text-lg font-semibold text-white">
+              Scan Student QR Code
+            </Text>
           </View>
-          <TouchableOpacity style={styles.closeButton} onPress={closeScanner}>
+          <TouchableOpacity
+            className="rounded-lg bg-[rgba(255,255,255,0.2)] px-6 py-3"
+            onPress={closeScanner}
+          >
             <Ionicons name="close" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.cameraContainer}>
+        <View className="relative flex-1">
           <CameraView
-            style={styles.camera}
+            style={{ flex: 1 }}
             facing="back"
             onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
             barcodeScannerSettings={{
@@ -218,62 +227,80 @@ const QRCodeScannerComponent: React.FC<QRCodeScannerProps> = ({
           />
 
           {scanned && (
-            <View style={styles.scannedOverlay}>
+            <View className="absolute inset-0 items-center justify-center bg-[rgba(0,0,0,0.8)]">
               <Ionicons name="checkmark-circle" size={64} color="#10B981" />
-              <Text style={styles.scannedText}>QR Code Scanned</Text>
+              <Text className="mt-4 text-lg font-semibold text-white">
+                QR Code Scanned
+              </Text>
               <TouchableOpacity
-                style={styles.scanAgainButton}
+                className="mt-4 rounded-lg bg-blue-500 px-6 py-3"
                 onPress={resetScanner}
               >
-                <Text style={styles.scanAgainButtonText}>Scan Again</Text>
+                <Text className="text-base font-semibold text-white">
+                  Scan Again
+                </Text>
               </TouchableOpacity>
             </View>
           )}
 
           {scanning && (
-            <View style={styles.scanningOverlay}>
+            <View className="absolute inset-0 items-center justify-center bg-[rgba(0,0,0,0.8)]">
               <ActivityIndicator size="large" color="#3B82F6" />
-              <Text style={styles.scanningText}>Processing...</Text>
+              <Text className="mt-4 text-base text-white">Processing...</Text>
             </View>
           )}
 
           {isProcessing && !scanned && (
-            <View style={styles.processingOverlay}>
+            <View className="absolute inset-0 items-center justify-center bg-[rgba(0,0,0,0.7)]">
               <ActivityIndicator size="large" color="#10B981" />
-              <Text style={styles.processingText}>Validating QR Code...</Text>
+              <Text className="mt-4 text-base font-semibold text-white">
+                Validating QR Code...
+              </Text>
             </View>
           )}
 
-          <View style={styles.scanArea}>
-            <View style={styles.scanFrame} />
-            <Text style={styles.scanInstructions}>
+          <View
+            className="absolute left-1/2 top-1/2 -translate-x-[100px] -translate-y-[100px] items-center"
+            style={{ width: 200, height: 200 }}
+          >
+            <View
+              className="rounded-xl border-2 border-blue-500 bg-transparent"
+              style={{ width: 200, height: 200 }}
+            />
+            <Text className="mt-4 rounded-lg bg-[rgba(0,0,0,0.6)] px-4 py-2 text-center text-sm text-white">
               Position the QR code within the frame
             </Text>
           </View>
         </View>
 
-        <View style={styles.statsContainer}>
-          <Text style={styles.statsTitle}>Today's Boardings</Text>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{stats.totalBoardings}</Text>
-              <Text style={styles.statLabel}>Total</Text>
+        <View className="bg-[rgba(0,0,0,0.8)] px-4 py-3">
+          <Text className="mb-2 text-base font-semibold text-white">
+            Today's Boardings
+          </Text>
+          <View className="flex-row justify-around">
+            <View className="items-center">
+              <Text className="text-xl font-extrabold text-white">
+                {stats.totalBoardings}
+              </Text>
+              <Text className="mt-0.5 text-xs text-gray-400">Total</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: "#10B981" }]}>
+            <View className="items-center">
+              <Text className="text-xl font-extrabold text-emerald-500">
                 {stats.successfulBoardings}
               </Text>
-              <Text style={styles.statLabel}>Successful</Text>
+              <Text className="mt-0.5 text-xs text-gray-400">Successful</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: "#EF4444" }]}>
+            <View className="items-center">
+              <Text className="text-xl font-extrabold text-red-500">
                 {stats.failedBoardings}
               </Text>
-              <Text style={styles.statLabel}>Failed</Text>
+              <Text className="mt-0.5 text-xs text-gray-400">Failed</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{stats.students.length}</Text>
-              <Text style={styles.statLabel}>Students</Text>
+            <View className="items-center">
+              <Text className="text-xl font-extrabold text-white">
+                {stats.students.length}
+              </Text>
+              <Text className="mt-0.5 text-xs text-gray-400">Students</Text>
             </View>
           </View>
         </View>
@@ -281,188 +308,5 @@ const QRCodeScannerComponent: React.FC<QRCodeScannerProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000000",
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.9)",
-    padding: 32,
-  },
-  permissionText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    textAlign: "center",
-    marginVertical: 16,
-  },
-  permissionButton: {
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginVertical: 8,
-  },
-  permissionButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  closeButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginVertical: 8,
-  },
-  closeButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-    marginLeft: 8,
-  },
-  cameraContainer: {
-    flex: 1,
-    position: "relative",
-  },
-  camera: {
-    flex: 1,
-  },
-  scannedOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scannedText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 16,
-  },
-  scanAgainButton: {
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  scanAgainButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  scanningOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scanningText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    marginTop: 16,
-  },
-  processingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  processingText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    marginTop: 16,
-    fontWeight: "600",
-  },
-  scanArea: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: [{ translateX: -100 }, { translateY: -100 }],
-    width: 200,
-    height: 200,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scanFrame: {
-    width: 200,
-    height: 200,
-    borderWidth: 2,
-    borderColor: "#3B82F6",
-    borderRadius: 12,
-    backgroundColor: "transparent",
-  },
-  scanInstructions: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    textAlign: "center",
-    marginTop: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  statsContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  statsTitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  statItem: {
-    alignItems: "center",
-  },
-  statNumber: {
-    color: "#FFFFFF",
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  statLabel: {
-    color: "#9CA3AF",
-    fontSize: 12,
-    marginTop: 2,
-  },
-});
 
 export default QRCodeScannerComponent;
