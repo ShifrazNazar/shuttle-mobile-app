@@ -150,21 +150,6 @@ const DigitalTravelCardComponent: React.FC<DigitalTravelCardProps> = ({
             <Text style={styles.usageText}>
               Used {travelCard.usageCount} times
             </Text>
-            {travelCard.lastUsed && (
-              <Text style={styles.lastUsedText}>
-                Last used:{" "}
-                {(() => {
-                  try {
-                    return travelCard.lastUsed instanceof Date
-                      ? travelCard.lastUsed.toLocaleDateString()
-                      : new Date(travelCard.lastUsed).toLocaleDateString();
-                  } catch (error) {
-                    console.error("Error formatting lastUsed date:", error);
-                    return "Unknown";
-                  }
-                })()}
-              </Text>
-            )}
           </View>
         </View>
       </View>
@@ -299,10 +284,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6B7280",
     marginBottom: 4,
-  },
-  lastUsedText: {
-    fontSize: 12,
-    color: "#9CA3AF",
   },
   instructions: {
     backgroundColor: "#FFFFFF",
