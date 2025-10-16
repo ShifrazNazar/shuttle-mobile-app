@@ -115,6 +115,7 @@ export interface TrackingButtonProps {
 // Bus Assignment Card Props
 export interface BusAssignmentCardProps {
   busId: string;
+  busName?: string; // e.g., license plate or display name
   routeName: string;
   isActive: boolean;
   onPress: () => void;

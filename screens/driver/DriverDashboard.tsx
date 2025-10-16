@@ -41,6 +41,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
   const [currentLocation, setCurrentLocation] = useState<LocationObject | null>(
     null
   );
+  const [busName, setBusName] = useState("");
 
   // Update driverId when user changes
   useEffect(() => {
@@ -59,6 +60,24 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
         const userData = userDoc.data();
         if (userData.assignedShuttleId) {
           setBusId(userData.assignedShuttleId);
+          try {
+            const shuttleDoc = await getDoc(
+              doc(firestore, "shuttles", userData.assignedShuttleId)
+            );
+            if (shuttleDoc.exists()) {
+              const shuttleData: any = shuttleDoc.data();
+              // Prefer a display name if present, else licensePlate, else the id
+              setBusName(
+                shuttleData.name ||
+                  shuttleData.licensePlate ||
+                  userData.assignedShuttleId
+              );
+            } else {
+              setBusName(userData.assignedShuttleId);
+            }
+          } catch (e) {
+            setBusName(userData.assignedShuttleId);
+          }
         }
       }
     } catch (error) {
@@ -197,6 +216,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = () => {
         {/* Assigned Bus Info */}
         <BusAssignmentCard
           busId={busId}
+          busName={busName}
           routeName={
             assignedRoutes.length > 0
               ? assignedRoutes[0].routeName

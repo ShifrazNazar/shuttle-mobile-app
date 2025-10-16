@@ -8,6 +8,8 @@ import {
 } from "../../services/firebase-realtime";
 import { getCurrentLocation } from "../../services/location";
 import { LocationObject } from "expo-location";
+import { doc, getDoc } from "firebase/firestore";
+import { firestore } from "../../services/firebase";
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -38,6 +40,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
   const [activeTab, setActiveTab] = useState<
     "routes" | "map" | "status" | "card"
   >("routes");
+  const [busName, setBusName] = useState("");
   const stopAlertShownRef = useRef<string | null>(null);
   const isMountedRef = useRef(true);
   const mapRef = useRef<MapView | null>(null);
@@ -179,6 +182,28 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
       unsubscribe();
     };
   }, [isTracking, busId]);
+
+  // Fetch and cache bus display name when busId changes
+  useEffect(() => {
+    const loadBusName = async () => {
+      if (!busId) {
+        setBusName("");
+        return;
+      }
+      try {
+        const shuttleDoc = await getDoc(doc(firestore, "shuttles", busId));
+        if (shuttleDoc.exists()) {
+          const data: any = shuttleDoc.data();
+          setBusName(data.name || data.licensePlate || busId);
+        } else {
+          setBusName(busId);
+        }
+      } catch (_e) {
+        setBusName(busId);
+      }
+    };
+    loadBusName();
+  }, [busId]);
 
   const defaultRegion = {
     latitude: 3.055465,
@@ -344,7 +369,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = () => {
             },
             {
               label: "Tracking",
-              value: isTracking && busLocation ? `Bus ${busId}` : "None",
+              value: isTracking && busLocation ? `Bus ${busName}` : "None",
             },
           ]}
         />
