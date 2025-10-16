@@ -1,7 +1,7 @@
-# 🚍 Smart Shuttle Mobile App
+# 🚍 Smart University Shuttle System - Mobile App
 
-**A React Native app for university shuttle tracking.**  
-Students and drivers get real-time GPS updates, smart schedules, and smooth digital check-ins — all from one unified app.
+**A comprehensive React Native mobile application for university shuttle management.**  
+Students and drivers get real-time GPS tracking, digital travel cards, and seamless shuttle management through a unified cross-platform app built with Expo.
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
@@ -9,26 +9,33 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 ## 🧭 Project Overview
 
-To develop a cross-platform mobile app that enhances campus commuting by giving students and drivers real-time shuttle tracking, notifications, and optimized schedules via AI-powered demand prediction.
+The Smart University Shuttle System Mobile App is part of a comprehensive transportation management solution that provides real-time shuttle tracking, digital travel card management, and AI-powered analytics. The mobile app serves as the primary interface for students and drivers, offering seamless navigation, real-time location sharing, and digital boarding capabilities.
+
+### System Architecture
+
+- **Mobile App**: React Native with Expo (this repository)
+- **Web Dashboard**: Next.js 15 admin interface for fleet management
+- **Backend**: Firebase services (Firestore, Realtime Database, Authentication)
+- **AI Integration**: Google Gemini AI for demand prediction and analytics
 
 ---
 
 ## 🎯 App Objectives
 
-### For Students:
+### For Students
 
-- Track shuttles in real time on interactive maps
-- Receive arrival alerts and notifications
-- Check in with digital travel cards (QR/NFC)
-- View live schedules and route information
-- Plan trips with accurate timing
+- **Real-time Shuttle Tracking**: Live GPS location updates with interactive map visualization
+- **Route Management**: View available routes, schedules, and real-time status
+- **Digital Travel Card**: QR code-based boarding system with usage tracking
+- **Interactive Maps**: Real-time shuttle locations with route visualization
+- **Route Filtering**: Filter routes by various criteria for better navigation
 
-### For Drivers:
+### For Drivers
 
-- Update GPS location automatically in background
-- Access assigned routes and schedules
-- Report incidents (delays, breakdowns, route changes)
-- Receive real-time updates from administrators
+- **GPS Location Broadcasting**: Background location sharing with configurable intervals
+- **Route Assignment Management**: View assigned routes and schedules
+- **QR Code Scanner**: Student boarding verification and validation
+- **Location Tracking**: Start/stop location sharing functionality
 
 ---
 
@@ -55,37 +62,31 @@ To develop a cross-platform mobile app that enhances campus commuting by giving 
 - Background location updates for drivers
 - Route visualization and progress tracking
 
-### 🔔 Smart Notifications
-
-- ETA alerts when shuttle approaches your stop
-- Emergency and delay notifications
-- Push notifications for service updates
-
 ### 💳 Digital Check-in System
 
-- QR code or NFC-based boarding
+- QR code boarding
 - Digital travel card validation
 - Usage analytics and reporting
 
 ### 📅 Dynamic Scheduling
 
 - Real-time schedule updates
-- Route change notifications
 - AI-powered demand prediction
 
 ---
 
 ## ⚙️ Tech Stack
 
-| Category           | Technology                     |
-| ------------------ | ------------------------------ |
-| Framework          | React Native with Expo SDK     |
-| Maps & Location    | Google Maps API, Expo Location |
-| Authentication     | Firebase Auth                  |
-| Real-time Data     | Firebase Firestore/RTDB        |
-| Push Notifications | Expo Push Notifications        |
-| State Management   | Context API / Zustand          |
-| Navigation         | React Navigation               |
+| Category         | Technology                     | Version  |
+| ---------------- | ------------------------------ | -------- |
+| Framework        | React Native with Expo SDK     | v52.0.47 |
+| Maps & Location  | Google Maps API, Expo Location | v18.0.10 |
+| Authentication   | Firebase Auth                  | v12.0.0  |
+| Real-time Data   | Firebase Firestore/RTDB        | v12.0.0  |
+| QR Code Scanning | Expo Camera                    | v16.0.18 |
+| State Management | React Context API              | Built-in |
+| Navigation       | Expo Router                    | v4.0.21  |
+| Styling          | NativeWind (Tailwind CSS)      | v4.1.23  |
 
 ---
 
@@ -123,6 +124,7 @@ To develop a cross-platform mobile app that enhances campus commuting by giving 
    - Create API key and add to `.env`
 
 5. **Start the app**
+
    ```bash
    npx expo start
    ```
